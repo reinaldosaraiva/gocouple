@@ -245,3 +245,19 @@ func TestWritersReportWriteErrors(t *testing.T) {
 		}
 	}
 }
+
+func TestSuppressedListedWithReason(t *testing.T) {
+	snap := cycleSnapshot()
+	snap.Suppressed = []model.Suppressed{{ID: "pain-zone", Package: "m/gen", Message: "x", Reason: "generated code"}}
+	table := render(t, func(b *bytes.Buffer, s *model.Snapshot) error { return Table(b, s) }, snap)
+	md := render(t, func(b *bytes.Buffer, s *model.Snapshot) error { return Markdown(b, s) }, snap)
+	for name, out := range map[string]string{"table": table, "markdown": md} {
+		if !strings.Contains(out, "Suppressed") || !strings.Contains(out, "pain-zone") || !strings.Contains(out, "generated code") {
+			t.Errorf("%s misses the suppressed entry:\n%s", name, out)
+		}
+	}
+	clean := render(t, func(b *bytes.Buffer, s *model.Snapshot) error { return Table(b, s) }, cycleSnapshot())
+	if strings.Contains(clean, "Suppressed") {
+		t.Errorf("table without suppressed entries must not print the section:\n%s", clean)
+	}
+}

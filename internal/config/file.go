@@ -8,6 +8,8 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"slices"
+	"strings"
 
 	"gopkg.in/yaml.v3"
 )
@@ -16,16 +18,23 @@ import (
 const FileName = ".gocouple.yaml"
 
 type fileConfig struct {
-	DistanceThreshold  *float64   `yaml:"distance_threshold"`
-	MinCaForPain       *int       `yaml:"min_ca_for_pain"`
-	GodCeThreshold     *int       `yaml:"god_ce_threshold"`
-	HotspotCaThreshold *int       `yaml:"hotspot_ca_threshold"`
-	SDPTolerance       *float64   `yaml:"sdp_tolerance"`
-	ExportedOnly       *bool      `yaml:"exported_only"`
-	IncludeExternal    *bool      `yaml:"include_external"`
-	Exclude            *[]string  `yaml:"exclude"`
-	CompositionRoots   *[]string  `yaml:"composition_roots"`
-	Check              *fileCheck `yaml:"check"`
+	DistanceThreshold  *float64     `yaml:"distance_threshold"`
+	MinCaForPain       *int         `yaml:"min_ca_for_pain"`
+	GodCeThreshold     *int         `yaml:"god_ce_threshold"`
+	HotspotCaThreshold *int         `yaml:"hotspot_ca_threshold"`
+	SDPTolerance       *float64     `yaml:"sdp_tolerance"`
+	ExportedOnly       *bool        `yaml:"exported_only"`
+	IncludeExternal    *bool        `yaml:"include_external"`
+	Exclude            *[]string    `yaml:"exclude"`
+	CompositionRoots   *[]string    `yaml:"composition_roots"`
+	Ignore             []fileIgnore `yaml:"ignore"`
+	Check              *fileCheck   `yaml:"check"`
+}
+
+type fileIgnore struct {
+	Rule    string `yaml:"rule"`
+	Package string `yaml:"package"`
+	Reason  string `yaml:"reason"`
 }
 
 type fileCheck struct {
@@ -53,6 +62,9 @@ func Parse(data []byte) (Config, error) {
 	set(&cfg.IncludeExternal, f.IncludeExternal)
 	set(&cfg.Exclude, f.Exclude)
 	set(&cfg.CompositionRoots, f.CompositionRoots)
+	for _, r := range f.Ignore {
+		cfg.Ignore = append(cfg.Ignore, IgnoreRule(r))
+	}
 	if c := f.Check; c != nil {
 		set(&cfg.Check.MaxDistance, c.MaxDistance)
 		set(&cfg.Check.MaxPainPackages, c.MaxPainPackages)
@@ -87,6 +99,16 @@ func (c Config) Validate() error {
 		return fmt.Errorf("config: check.max_distance must be in [0,1], got %v", c.Check.MaxDistance)
 	case c.Check.MaxPainPackages < 0:
 		return fmt.Errorf("config: check.max_pain_packages must be >= 0, got %d", c.Check.MaxPainPackages)
+	}
+	for i, r := range c.Ignore {
+		switch {
+		case !slices.Contains(KnownRules, r.Rule):
+			return fmt.Errorf("config: ignore[%d].rule %q is not a known rule (%s)", i, r.Rule, strings.Join(KnownRules, ", "))
+		case r.Package == "":
+			return fmt.Errorf("config: ignore[%d].package must not be empty", i)
+		case strings.TrimSpace(r.Reason) == "":
+			return fmt.Errorf("config: ignore[%d].reason must not be empty: say why %s on %s is acceptable", i, r.Rule, r.Package)
+		}
 	}
 	return nil
 }

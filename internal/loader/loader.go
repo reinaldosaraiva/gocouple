@@ -3,6 +3,8 @@ package loader
 import (
 	"context"
 	"fmt"
+	"go/ast"
+	"go/token"
 	"go/types"
 	"sort"
 	"strings"
@@ -67,8 +69,14 @@ func Load(ctx context.Context, opts Options) (Result, error) {
 	out := make([]model.Package, 0, len(byPath))
 	typed := make([]typesusage.Package, 0, len(byPath))
 	for path, p := range byPath {
-		out = append(out, convert(path, p, module, opts))
-		typed = append(typed, typesusage.Package{Path: path, IsMain: p.Name == "main", Types: p.Types, Info: p.TypesInfo})
+		gen := scanGenerated(p)
+		pkg := convert(path, p, module, opts)
+		pkg.Generated = gen.pure
+		out = append(out, pkg)
+		typed = append(typed, typesusage.Package{
+			Path: path, IsMain: p.Name == "main", Types: p.Types, Info: p.TypesInfo,
+			GeneratedTypes: gen.types(p),
+		})
 	}
 	sort.Slice(out, func(i, j int) bool { return out[i].Path < out[j].Path })
 	sort.Slice(typed, func(i, j int) bool { return typed[i].Path < typed[j].Path })
@@ -128,6 +136,50 @@ func convert(path string, p *packages.Package, module string, opts Options) mode
 	}
 	sort.Strings(out.Imports)
 	out.Nc, out.Na = countTypes(p.Types, opts.ExportedOnly)
+	return out
+}
+
+type generation struct {
+	files map[string]bool
+	pure  bool
+}
+
+// scanGenerated finds the non-test files carrying the standard "Code generated
+// ... DO NOT EDIT." header. A package is pure generated when it has such a file
+// and no hand-written declaration outside imports.
+func scanGenerated(p *packages.Package) generation {
+	g := generation{files: map[string]bool{}}
+	handWritten := false
+	for _, f := range p.Syntax {
+		name := p.Fset.Position(f.Pos()).Filename
+		if strings.HasSuffix(name, "_test.go") {
+			continue
+		}
+		if ast.IsGenerated(f) {
+			g.files[name] = true
+			continue
+		}
+		for _, d := range f.Decls {
+			if gd, ok := d.(*ast.GenDecl); !ok || gd.Tok != token.IMPORT {
+				handWritten = true
+			}
+		}
+	}
+	g.pure = len(g.files) > 0 && !handWritten
+	return g
+}
+
+func (g generation) types(p *packages.Package) map[string]bool {
+	if len(g.files) == 0 || p.Types == nil {
+		return nil
+	}
+	out := map[string]bool{}
+	scope := p.Types.Scope()
+	for _, name := range scope.Names() {
+		if tn, ok := scope.Lookup(name).(*types.TypeName); ok && g.files[p.Fset.Position(tn.Pos()).Filename] {
+			out[name] = true
+		}
+	}
 	return out
 }
 

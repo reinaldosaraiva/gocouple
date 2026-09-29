@@ -69,7 +69,7 @@ func Evaluate(current, baseline *model.Snapshot, opts Options) []Violation {
 	for _, p := range current.Packages {
 		d := float64(p.Distance)
 		relevant := p.Zone == model.ZoneUselessness || (p.Zone == model.ZonePain && p.Ca >= opts.MinCaForPain)
-		if relevant && d > opts.MaxDistance {
+		if relevant && d > opts.MaxDistance && !zoneSilenced(current, p) {
 			out = append(out, Violation{
 				Rule: RuleMaxDistance, Package: p.Path, Severity: model.SeverityError,
 				Message:   fmt.Sprintf("%s: distance %.4f exceeds %.4f (zone %s, Ca %d)", p.Path, d, opts.MaxDistance, p.Zone, p.Ca),
@@ -151,6 +151,22 @@ func regressions(current, baseline *model.Snapshot, opts Options) []Violation {
 		})
 	}
 	return out
+}
+
+func zoneSilenced(s *model.Snapshot, p model.Package) bool {
+	if p.Generated {
+		return true
+	}
+	id := "pain-zone"
+	if p.Zone == model.ZoneUselessness {
+		id = "uselessness-zone"
+	}
+	for _, x := range s.Suppressed {
+		if x.Package == p.Path && x.ID == id {
+			return true
+		}
+	}
+	return false
 }
 
 func painDiagnostics(s *model.Snapshot) []model.Diagnostic {

@@ -53,5 +53,16 @@ func Table(w io.Writer, snap *model.Snapshot) error {
 			return fmt.Errorf("writing diagnostic: %w", err)
 		}
 	}
+	if len(snap.Suppressed) == 0 {
+		return nil
+	}
+	if _, err := fmt.Fprintf(w, "\nSuppressed (%d)\n", len(snap.Suppressed)); err != nil {
+		return fmt.Errorf("writing suppressed: %w", err)
+	}
+	for _, d := range snap.Suppressed {
+		if _, err := fmt.Fprintf(w, "%s %s: %s\n", d.ID, d.Package, d.Reason); err != nil {
+			return fmt.Errorf("writing suppressed: %w", err)
+		}
+	}
 	return nil
 }

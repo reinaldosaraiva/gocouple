@@ -46,6 +46,7 @@ type Package struct {
 	Zone         string   `json:"zone"`
 	Imports      []string `json:"imports"`
 	ImportedBy   []string `json:"imported_by"`
+	Generated    bool     `json:"generated,omitempty"`
 }
 
 // Commit identifies the analyzed revision.
@@ -70,6 +71,15 @@ type Diagnostic struct {
 	Package  string         `json:"package"`
 	Message  string         `json:"message"`
 	Evidence map[string]any `json:"evidence"`
+}
+
+// Suppressed is a diagnostic that was found and deliberately not reported,
+// with the reason it was silenced.
+type Suppressed struct {
+	ID      string `json:"id"`
+	Package string `json:"package"`
+	Message string `json:"message"`
+	Reason  string `json:"reason"`
 }
 
 // Summary aggregates a snapshot.
@@ -104,6 +114,7 @@ type Snapshot struct {
 	Packages      []Package    `json:"packages"`
 	Cycles        [][]string   `json:"cycles"`
 	Diagnostics   []Diagnostic `json:"diagnostics"`
+	Suppressed    []Suppressed `json:"suppressed,omitempty"`
 	Summary       Summary      `json:"summary"`
 
 	Interfaces []InterfaceUsage `json:"-"`

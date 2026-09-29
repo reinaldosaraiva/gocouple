@@ -186,3 +186,19 @@ func TestWastedAbstraction(t *testing.T) {
 		t.Errorf("evidence = %v", d.Evidence)
 	}
 }
+
+func TestSuppressKeepsCyclesThroughGeneratedPackages(t *testing.T) {
+	snap := &model.Snapshot{Packages: []model.Package{{Path: "m/gen", Generated: true}, {Path: "m/a"}}}
+	diags := []model.Diagnostic{
+		{ID: "dependency-cycle", Package: "m/gen"},
+		{ID: "pain-zone", Package: "m/gen"},
+		{ID: "pain-zone", Package: "m/a"},
+	}
+	kept, suppressed := Suppress(snap, config.Default(), diags)
+	if diff := cmp.Diff([]string{"dependency-cycle:m/gen", "pain-zone:m/a"}, ids(kept)); diff != "" {
+		t.Errorf("kept (-want +got):\n%s", diff)
+	}
+	if len(suppressed) != 1 || suppressed[0].ID != "pain-zone" || suppressed[0].Reason != "generated code" {
+		t.Errorf("suppressed = %+v", suppressed)
+	}
+}

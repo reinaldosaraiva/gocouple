@@ -94,3 +94,36 @@ func FuzzParse(f *testing.F) {
 		}
 	})
 }
+
+func TestParseIgnore(t *testing.T) {
+	cfg, err := Parse([]byte("ignore:\n  - rule: pain-zone\n    package: '**/internal/config'\n    reason: value struct read once at startup\n"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	reason, ok := cfg.IgnoreReason("pain-zone", "m/internal/config")
+	if !ok || reason != "value struct read once at startup" {
+		t.Errorf("IgnoreReason = %q, %v", reason, ok)
+	}
+	if _, ok := cfg.IgnoreReason("god-package", "m/internal/config"); ok {
+		t.Error("other rules must not be silenced")
+	}
+	if _, ok := cfg.IgnoreReason("pain-zone", "m/internal/other"); ok {
+		t.Error("other packages must not be silenced")
+	}
+}
+
+func TestParseIgnoreRejectsIncompleteEntries(t *testing.T) {
+	for name, in := range map[string]string{
+		"unknown rule":   "ignore:\n  - rule: pain\n    package: x\n    reason: r\n",
+		"missing reason": "ignore:\n  - rule: pain-zone\n    package: x\n",
+		"blank reason":   "ignore:\n  - rule: pain-zone\n    package: x\n    reason: '  '\n",
+		"missing glob":   "ignore:\n  - rule: pain-zone\n    reason: r\n",
+		"unknown key":    "ignore:\n  - rule: pain-zone\n    package: x\n    reason: r\n    why: r\n",
+	} {
+		t.Run(name, func(t *testing.T) {
+			if _, err := Parse([]byte(in)); err == nil {
+				t.Error("expected an error")
+			}
+		})
+	}
+}

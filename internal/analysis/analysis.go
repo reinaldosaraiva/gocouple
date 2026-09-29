@@ -51,6 +51,11 @@ func Run(ctx context.Context, opts Options) (*model.Snapshot, error) {
 		Summary:  res.Summary,
 	}
 	snap.Interfaces = typesusage.Analyze(loaded.Typed, cfg.IsCompositionRoot)
-	snap.Diagnostics = diagnose.Run(ctx, snap, cfg, diagnose.Rules())
+	diags := diagnose.Run(ctx, snap, cfg, diagnose.Rules())
+	var suppressed []model.Suppressed
+	snap.Diagnostics, suppressed = diagnose.Suppress(snap, cfg, diags)
+	if len(suppressed) > 0 {
+		snap.Suppressed = suppressed
+	}
 	return snap, nil
 }

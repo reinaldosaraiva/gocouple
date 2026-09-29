@@ -39,6 +39,13 @@ func Markdown(w io.Writer, snap *model.Snapshot) error {
 		fmt.Fprintf(&b, "- **%s** `%s` `%s`: %s\n", d.Severity, d.ID, d.Package, d.Message)
 	}
 
+	if len(snap.Suppressed) > 0 {
+		b.WriteString("\n## Suppressed\n\n")
+		for _, d := range snap.Suppressed {
+			fmt.Fprintf(&b, "- `%s` `%s`: %s\n", d.ID, d.Package, d.Reason)
+		}
+	}
+
 	b.WriteString("\n## Dependency graph\n\n")
 	b.WriteString(reducedGraph(snap))
 

@@ -18,7 +18,22 @@ type Config struct {
 	IncludeExternal    bool
 	Exclude            []string
 	CompositionRoots   []string
+	Ignore             []IgnoreRule
 	Check              Check
+}
+
+// IgnoreRule silences one diagnostic rule on the packages matching a glob
+// while keeping the package in every metric. Reason is mandatory.
+type IgnoreRule struct {
+	Rule    string
+	Package string
+	Reason  string
+}
+
+// KnownRules lists the diagnostic rule identifiers an IgnoreRule may name.
+var KnownRules = []string{
+	"concrete-hotspot", "dependency-cycle", "god-package", "pain-zone",
+	"sdp-violation", "uselessness-zone", "wasted-abstraction",
 }
 
 // Check holds the thresholds enforced by the check command.
@@ -49,6 +64,17 @@ func (c Config) IsExcluded(pkgPath string) bool {
 // IsCompositionRoot reports whether pkgPath matches a composition root glob.
 func (c Config) IsCompositionRoot(pkgPath string) bool {
 	return matchAny(c.CompositionRoots, pkgPath)
+}
+
+// IgnoreReason returns the reason of the first ignore rule that silences
+// rule on pkgPath.
+func (c Config) IgnoreReason(rule, pkgPath string) (string, bool) {
+	for _, r := range c.Ignore {
+		if r.Rule == rule && MatchGlob(r.Package, pkgPath) {
+			return r.Reason, true
+		}
+	}
+	return "", false
 }
 
 func matchAny(globs []string, path string) bool {

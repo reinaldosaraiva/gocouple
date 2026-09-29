@@ -13,6 +13,8 @@ type Package struct {
 	IsMain bool
 	Types  *types.Package
 	Info   *types.Info
+
+	GeneratedTypes map[string]bool
 }
 
 type key struct{ pkg, name string }
@@ -121,7 +123,7 @@ func exportedInterfaces(pkgs []Package) map[key]*types.Interface {
 		scope := p.Types.Scope()
 		for _, name := range scope.Names() {
 			tn, ok := scope.Lookup(name).(*types.TypeName)
-			if !ok || tn.IsAlias() || !tn.Exported() || isGeneric(tn) {
+			if !ok || tn.IsAlias() || !tn.Exported() || isGeneric(tn) || p.GeneratedTypes[name] {
 				continue
 			}
 			iface, ok := tn.Type().Underlying().(*types.Interface)

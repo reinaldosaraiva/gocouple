@@ -133,3 +133,15 @@ func TestValidSeverity(t *testing.T) {
 		t.Error("fatal must be invalid")
 	}
 }
+
+func TestMaxDistanceSkipsSilencedPackages(t *testing.T) {
+	o := opts()
+	generated := model.Package{Path: "m/gen", Zone: model.ZonePain, Ca: 5, Distance: 1, Generated: true}
+	ignored := model.Package{Path: "m/cfg", Zone: model.ZonePain, Ca: 5, Distance: 1}
+	other := model.Package{Path: "m/other", Zone: model.ZonePain, Ca: 5, Distance: 1}
+	s := snap([]model.Package{generated, ignored, other}, nil, nil, 0)
+	s.Suppressed = []model.Suppressed{{ID: "pain-zone", Package: "m/cfg", Reason: "value struct"}}
+	if diff := cmp.Diff([]string{"max-distance:m/other"}, rules(Evaluate(s, nil, o))); diff != "" {
+		t.Errorf("(-want +got):\n%s", diff)
+	}
+}
