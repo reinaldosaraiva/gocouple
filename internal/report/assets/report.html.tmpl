@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{.Title}}</title>
+<style>{{.CSS}}</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <marker id="m-arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path class="arrow" d="M0 0 L8 4 L0 8 z"/></marker>
+    <marker id="m-arrow-cycle" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path class="arrow-cycle" d="M0 0 L8 4 L0 8 z"/></marker>
+    <marker id="m-arrow-sdp" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path class="arrow-sdp" d="M0 0 L8 4 L0 8 z"/></marker>
+  </defs>
+</svg>
+<main>
+  <h1>Coupling and architectural health</h1>
+  <p class="sub">{{.Module}}</p>
+
+  {{if .HasHistory}}
+  <div class="card controls">
+    <label for="frame">Commit</label>
+    <input id="frame" type="range" min="0" max="{{.Last}}" value="{{.Last}}" step="1" aria-describedby="frame-help">
+    <label for="trail">Trail</label>
+    <select id="trail">
+      <option value="">none</option>
+      {{range .TrailPkgs}}<option value="{{.}}">{{.}}</option>{{end}}
+    </select>
+    <span id="frame-help" class="note">Slide to move through {{len .Frames}} snapshots, oldest to newest.</span>
+  </div>
+  {{end}}
+  {{if .Skipped}}
+  <div class="card note">Skipped commits that could not be analyzed:
+    <ul>{{range .Skipped}}<li>{{.}}</li>{{end}}</ul>
+  </div>
+  {{end}}
+
+  <div class="card">
+    {{range .Frames}}
+    <p class="stats" data-frame="{{.Index}}" {{if .Hidden}}hidden{{end}}>
+      <b>{{.Label}}</b>
+      <span>packages <b>{{.Summary.Packages}}</b></span>
+      <span>avg D <b>{{.AvgD}}</b></span>
+      <span>pain <b>{{.Summary.Pain}}</b></span>
+      <span>uselessness <b>{{.Summary.Uselessness}}</b></span>
+      <span>cycles <b>{{.Summary.Cycles}}</b></span>
+    </p>
+    {{end}}
+  </div>
+
+  <div class="grid{{if not .HasHistory}} single{{end}}">
+    <section class="card" aria-labelledby="h-chart">
+      <h2 id="h-chart">Abstractness × Instability</h2>
+      <svg viewBox="{{.Chart.ViewBox}}" role="img" aria-labelledby="t-chart">
+        <title id="t-chart">Abstractness versus instability of each package, with the main sequence and the pain and uselessness zones</title>
+        {{if .Chart.PainPoints}}<polygon class="band-pain" points="{{.Chart.PainPoints}}"><title>Zone of pain</title></polygon>{{end}}
+        {{if .Chart.UselessPoints}}<polygon class="band-use" points="{{.Chart.UselessPoints}}"><title>Zone of uselessness</title></polygon>{{end}}
+        <rect class="axis" x="{{.Chart.Left}}" y="{{.Chart.Top}}" width="{{.Chart.Width}}" height="{{.Chart.Height}}"/>
+        {{range .Chart.XTicks}}<line class="grid-line" x1="{{.Pos}}" y1="{{$.Chart.Top}}" x2="{{.Pos}}" y2="{{$.Chart.Bottom}}"/><text class="tick" x="{{.X}}" y="{{.Y}}" text-anchor="middle">{{.Label}}</text>{{end}}
+        {{range .Chart.YTicks}}<line class="grid-line" x1="{{$.Chart.Left}}" y1="{{.Pos}}" x2="{{$.Chart.Right}}" y2="{{.Pos}}"/><text class="tick" x="{{.X}}" y="{{.Y}}" text-anchor="end">{{.Label}}</text>{{end}}
+        <line class="main-seq" x1="{{.Chart.MainSeqX1}}" y1="{{.Chart.MainSeqY1}}" x2="{{.Chart.MainSeqX2}}" y2="{{.Chart.MainSeqY2}}"><title>Main sequence (A + I = 1)</title></line>
+        <text class="axis-title" x="{{.Chart.XTitleX}}" y="{{.Chart.XTitleY}}" text-anchor="middle">Instability (I)</text>
+        <text class="axis-title" x="{{.Chart.YTitleX}}" y="{{.Chart.YTitleY}}" text-anchor="middle" transform="rotate(-90 {{.Chart.YTitleX}} {{.Chart.YTitleY}})">Abstractness (A)</text>
+        {{range .Trails}}<g class="trail-group" data-pkg="{{.Pkg}}" hidden><polyline class="trail" points="{{.Points}}"/>{{range .Dots}}<circle class="trail-dot" cx="{{.CX}}" cy="{{.CY}}" r="3"/>{{end}}</g>{{end}}
+        {{range .Frames}}<g data-frame="{{.Index}}" {{if .Hidden}}hidden{{end}}>
+          {{range .Points}}<circle class="pt pt-{{.Zone}}" cx="{{.CX}}" cy="{{.CY}}" r="{{.R}}"><title>{{.Title}}</title></circle>{{end}}
+        </g>{{end}}
+      </svg>
+      <p class="note">Zone threshold D &gt; {{.Chart.Threshold}}. Point size grows with Ca.</p>
+    </section>
+
+    {{if .HasHistory}}
+    <section class="card" aria-labelledby="h-series">
+      <h2 id="h-series">Over time</h2>
+      <div class="grid">
+        {{range $s := .Series}}
+        <figure style="margin:0">
+          <figcaption class="note">{{.Title}}</figcaption>
+          <svg viewBox="{{.ViewBox}}" role="img" aria-label="{{.Title}}">
+            <line class="axis" x1="{{.AxisX1}}" y1="{{.Base}}" x2="{{.AxisX2}}" y2="{{.Base}}"/>
+            <line class="axis" x1="{{.Left}}" y1="{{.MaxY}}" x2="{{.Left}}" y2="{{.Base}}"/>
+            <text class="tick" x="{{.Left}}" y="{{.MaxY}}" text-anchor="end" dx="-4">{{.MaxLbl}}</text>
+            <text class="tick" x="{{.Left}}" y="{{.Base}}" text-anchor="end" dx="-4">{{.MinLbl}}</text>
+            {{range .Lines}}<polyline class="{{.Class}}" points="{{.Points}}"><title>{{.Name}}</title></polyline>{{end}}
+            {{range .Markers}}<line class="marker" data-frame="{{.Frame}}" x1="{{.X}}" y1="{{$s.Top}}" x2="{{.X}}" y2="{{$s.Base}}" hidden/>{{end}}
+            <text class="legend" x="{{.Left}}" y="{{.LabelY}}">{{.First}}</text>
+            <text class="legend" x="{{.AxisX2}}" y="{{.LabelY}}" text-anchor="end">{{.Last}}</text>
+          </svg>
+          {{if .Legend}}<p class="note">{{range .Legend}}<span class="sev sev-{{.Name}}">{{.Name}}</span> {{end}}</p>{{end}}
+        </figure>
+        {{end}}
+      </div>
+    </section>
+    {{end}}
+  </div>
+
+  <section class="card" aria-labelledby="h-graph">
+    <h2 id="h-graph">Dependency graph</h2>
+    <p class="note">Arrows point from importer to imported package. Columns group packages by instability. Red edges are inside a cycle; dashed amber edges violate the stable dependencies principle.</p>
+    {{range .Frames}}
+    <div class="scroll" data-frame="{{.Index}}" {{if .Hidden}}hidden{{end}}>
+      {{if .Graph.Omitted}}<p class="note">{{.Graph.Omitted}}</p>{{else}}
+      <svg class="dep-graph" viewBox="{{.Graph.ViewBox}}" role="img" aria-label="Dependency graph of {{.Label}}">
+        {{range .Graph.ColTitles}}<text class="col-title" x="{{.X}}" y="16">{{.Text}}</text>{{end}}
+        {{range .Graph.Edges}}<line class="{{.Class}}" data-a="{{.A}}" data-b="{{.B}}" x1="{{.X1}}" y1="{{.Y1}}" x2="{{.X2}}" y2="{{.Y2}}" marker-end="url(#m-{{.Marker}})"/>{{end}}
+        {{range .Graph.Nodes}}<g class="node node-{{.Zone}}" data-id="{{.ID}}" data-nb="{{.Neighbors}}" tabindex="0"><title>{{.Title}}</title><rect x="{{.X}}" y="{{.Y}}" width="{{.W}}" height="{{.H}}" rx="4"/><text x="{{.TextX}}" y="{{.TextY}}">{{.Label}}</text></g>{{end}}
+      </svg>
+      {{end}}
+    </div>
+    {{end}}
+  </section>
+
+  <section class="card" aria-labelledby="h-pkgs">
+    <h2 id="h-pkgs">Packages</h2>
+    {{range .Frames}}
+    <div class="scroll" data-frame="{{.Index}}" {{if .Hidden}}hidden{{end}}>
+      <table class="sortable">
+        <thead><tr>
+          <th scope="col"><button type="button">Package</button></th>
+          <th scope="col" data-num="1"><button type="button">Ca</button></th>
+          <th scope="col" data-num="1"><button type="button">Ce</button></th>
+          <th scope="col" data-num="1"><button type="button">I</button></th>
+          <th scope="col" data-num="1"><button type="button">Na</button></th>
+          <th scope="col" data-num="1"><button type="button">Nc</button></th>
+          <th scope="col" data-num="1"><button type="button">A</button></th>
+          <th scope="col" data-num="1"><button type="button">D</button></th>
+          <th scope="col"><button type="button">Zone</button></th>
+        </tr></thead>
+        <tbody>
+        {{range .Rows}}<tr>
+          <td data-sort="{{.Path}}">{{.Path}}</td>
+          <td data-sort="{{.Ca}}">{{.Ca}}</td>
+          <td data-sort="{{.Ce}}">{{.Ce}}</td>
+          <td data-sort="{{.IRaw}}">{{.I}}</td>
+          <td data-sort="{{.Na}}">{{.Na}}</td>
+          <td data-sort="{{.Nc}}">{{.Nc}}</td>
+          <td data-sort="{{.ARaw}}">{{.A}}</td>
+          <td data-sort="{{.DRaw}}">{{.D}}</td>
+          <td data-sort="{{.Zone}}" class="zone-{{.Zone}}">{{.Zone}}</td>
+        </tr>{{end}}
+        </tbody>
+      </table>
+    </div>
+    {{end}}
+  </section>
+
+  <section class="card" aria-labelledby="h-diags">
+    <h2 id="h-diags">Diagnostics</h2>
+    {{range .Frames}}
+    <div data-frame="{{.Index}}" {{if .Hidden}}hidden{{end}}>
+      {{if .Diags}}<ul class="diags">
+        {{range .Diags}}<li><span class="sev sev-{{.Severity}}">{{.Severity}}</span> <b>{{.ID}}</b> <code>{{.Package}}</code>: {{.Message}}</li>{{end}}
+      </ul>{{else}}<p class="note">No diagnostics.</p>{{end}}
+    </div>
+    {{end}}
+  </section>
+</main>
+<script>{{.JS}}</script>
+</body>
+</html>

@@ -1,0 +1,51 @@
+name: gocouple check
+description: Fail the build when Go package coupling metrics violate thresholds or regress against a baseline.
+author: reinaldosaraiva
+branding:
+  icon: activity
+  color: blue
+
+inputs:
+  args:
+    description: Arguments passed to `gocouple check` (word-split), for example "./..." or "--fail-on warning ./...".
+    required: false
+    default: ./...
+  baseline:
+    description: Path to an analysis.json; only regressions relative to it fail.
+    required: false
+    default: ""
+  version:
+    description: Version of gocouple to install (a tag such as v0.1.0, or latest).
+    required: false
+    default: latest
+  working-directory:
+    description: Directory of the Go module to check.
+    required: false
+    default: .
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+      with:
+        go-version: stable
+    - name: Install gocouple
+      shell: bash
+      env:
+        VERSION: ${{ inputs.version }}
+      run: go install "github.com/reinaldosaraiva/gocouple/cmd/gocouple@${VERSION}"
+    - name: Run gocouple check
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      env:
+        ARGS: ${{ inputs.args }}
+        BASELINE: ${{ inputs.baseline }}
+      run: |
+        set -euo pipefail
+        extra=()
+        if [ -n "$BASELINE" ]; then
+          extra+=(--baseline "$BASELINE")
+        fi
+        # ARGS is intentionally word-split so several arguments can be passed.
+        # shellcheck disable=SC2086
+        "$(go env GOPATH)/bin/gocouple" check ${extra[@]+"${extra[@]}"} $ARGS

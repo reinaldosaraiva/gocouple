@@ -1,0 +1,10 @@
+flowchart LR
+  n1["a"]:::main_sequence
+  n2["b"]:::main_sequence
+  n3["c"]:::pain
+  n1 --> n2
+  n2 --> n3
+  classDef isolated fill:#dddddd,stroke:#555
+  classDef main_sequence fill:#c9e7c9,stroke:#555
+  classDef pain fill:#f4b6b6,stroke:#555
+  classDef uselessness fill:#f7d9a8,stroke:#555

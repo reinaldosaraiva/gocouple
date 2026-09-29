@@ -1,0 +1,639 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>gocouple report: example.com/demo</title>
+<style>:root {
+  color-scheme: light dark;
+  --bg: #ffffff;
+  --fg: #1c2330;
+  --muted: #566073;
+  --card: #f4f6f9;
+  --border: #d3d9e2;
+  --accent: #1f5fa8;
+  --pain: #c62f2f;
+  --pain-fill: rgba(198, 47, 47, 0.14);
+  --use: #a35f00;
+  --use-fill: rgba(163, 95, 0, 0.14);
+  --ok: #1f7a4f;
+  --iso: #6b7588;
+  --cycle: #c62f2f;
+  --sdp: #a35f00;
+  --edge: #6b7588;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0f141b;
+    --fg: #e6e9ee;
+    --muted: #a3adbd;
+    --card: #171e28;
+    --border: #2c3644;
+    --accent: #6cb0ff;
+    --pain: #ff8080;
+    --pain-fill: rgba(255, 128, 128, 0.16);
+    --use: #f2b866;
+    --use-fill: rgba(242, 184, 102, 0.16);
+    --ok: #55c98f;
+    --iso: #8b95a8;
+    --cycle: #ff8080;
+    --sdp: #f2b866;
+    --edge: #8b95a8;
+  }
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+main { max-width: 1120px; margin: 0 auto; padding: 16px; }
+h1 { font-size: 1.35rem; margin: 0 0 4px; }
+h2 { font-size: 1.05rem; margin: 0 0 8px; }
+.sub { color: var(--muted); margin: 0 0 16px; overflow-wrap: anywhere; }
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 14px; margin-bottom: 16px; }
+.grid { display: grid; gap: 16px; grid-template-columns: 1fr; }
+@media (min-width: 820px) { .grid { grid-template-columns: 1fr 1fr; } .grid.single { grid-template-columns: minmax(0, 640px); } }
+svg { display: block; width: 100%; height: auto; }
+.scroll { overflow-x: auto; }
+.scroll svg { min-width: 640px; }
+.controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 12px; }
+.controls label { color: var(--muted); }
+.controls input[type="range"] { flex: 1 1 220px; min-width: 160px; }
+select, button { font: inherit; color: var(--fg); background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 4px 8px; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.stats { display: flex; flex-wrap: wrap; gap: 8px 18px; color: var(--muted); margin: 0 0 10px; }
+.stats b { color: var(--fg); }
+table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+th, td { padding: 5px 8px; border-bottom: 1px solid var(--border); text-align: right; white-space: nowrap; }
+th:first-child, td:first-child { text-align: left; }
+.scroll table { min-width: 640px; }
+th button { border: 0; background: none; padding: 0; font-weight: 600; cursor: pointer; color: var(--fg); }
+th button::after { content: " \2195"; color: var(--muted); }
+th[aria-sort="ascending"] button::after { content: " \25B2"; color: var(--accent); }
+th[aria-sort="descending"] button::after { content: " \25BC"; color: var(--accent); }
+.zone-pain { color: var(--pain); }
+.zone-uselessness { color: var(--use); }
+.zone-main_sequence { color: var(--ok); }
+.zone-isolated { color: var(--iso); }
+ul.diags { list-style: none; margin: 0; padding: 0; }
+ul.diags li { padding: 6px 0; border-bottom: 1px solid var(--border); overflow-wrap: anywhere; }
+.sev { display: inline-block; min-width: 4.5em; font-weight: 600; }
+.sev-error { color: var(--pain); }
+.sev-warning { color: var(--use); }
+.sev-info { color: var(--accent); }
+.note { color: var(--muted); font-style: italic; }
+[hidden] { display: none !important; }
+
+.band-pain { fill: var(--pain-fill); }
+.band-use { fill: var(--use-fill); }
+.axis, .grid-line { stroke: var(--border); stroke-width: 1; fill: none; }
+.main-seq { stroke: var(--muted); stroke-width: 1.5; stroke-dasharray: 5 4; fill: none; }
+.tick { fill: var(--muted); font-size: 11px; }
+.axis-title { fill: var(--muted); font-size: 12px; }
+.pt { stroke: var(--bg); stroke-width: 1.5; fill-opacity: 0.85; }
+.pt-pain { fill: var(--pain); }
+.pt-uselessness { fill: var(--use); }
+.pt-main_sequence { fill: var(--ok); }
+.pt-isolated { fill: var(--iso); }
+.trail { fill: none; stroke: var(--accent); stroke-width: 2; }
+.trail-dot { fill: var(--accent); }
+.series-line { fill: none; stroke: var(--accent); stroke-width: 2; }
+.series-error { stroke: var(--pain); }
+.series-warning { stroke: var(--use); }
+.series-info { stroke: var(--accent); }
+.marker { stroke: var(--fg); stroke-width: 1; stroke-dasharray: 3 3; }
+.legend { fill: var(--muted); font-size: 11px; }
+
+.node rect { fill: var(--bg); stroke-width: 1.5; }
+.node text { fill: var(--fg); font-size: 11px; }
+.node-pain rect { stroke: var(--pain); }
+.node-uselessness rect { stroke: var(--use); }
+.node-main_sequence rect { stroke: var(--ok); }
+.node-isolated rect { stroke: var(--iso); }
+.edge { stroke: var(--edge); stroke-width: 1; fill: none; opacity: 0.7; }
+.edge-cycle { stroke: var(--cycle); stroke-width: 2; opacity: 1; }
+.edge-sdp { stroke: var(--sdp); stroke-width: 2; stroke-dasharray: 4 3; opacity: 1; }
+.arrow { fill: var(--edge); }
+.arrow-cycle { fill: var(--cycle); }
+.arrow-sdp { fill: var(--sdp); }
+.col-title { fill: var(--muted); font-size: 11px; }
+svg.dim .edge, svg.dim .node { opacity: 0.18; }
+svg.dim .hl { opacity: 1; }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <marker id="m-arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path class="arrow" d="M0 0 L8 4 L0 8 z"/></marker>
+    <marker id="m-arrow-cycle" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path class="arrow-cycle" d="M0 0 L8 4 L0 8 z"/></marker>
+    <marker id="m-arrow-sdp" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path class="arrow-sdp" d="M0 0 L8 4 L0 8 z"/></marker>
+  </defs>
+</svg>
+<main>
+  <h1>Coupling and architectural health</h1>
+  <p class="sub">example.com/demo</p>
+
+  
+  <div class="card controls">
+    <label for="frame">Commit</label>
+    <input id="frame" type="range" min="0" max="2" value="2" step="1" aria-describedby="frame-help">
+    <label for="trail">Trail</label>
+    <select id="trail">
+      <option value="">none</option>
+      <option value="api">api</option><option value="auth">auth</option><option value="core">core</option><option value="db">db</option>
+    </select>
+    <span id="frame-help" class="note">Slide to move through 3 snapshots, oldest to newest.</span>
+  </div>
+  
+  
+  <div class="card note">Skipped commits that could not be analyzed:
+    <ul><li>deadbee: does not compile</li></ul>
+  </div>
+  
+
+  <div class="card">
+    
+    <p class="stats" data-frame="0" hidden>
+      <b>3f9a1c2 2026-03-01 feat: add api and core packages</b>
+      <span>packages <b>2</b></span>
+      <span>avg D <b>0.25</b></span>
+      <span>pain <b>0</b></span>
+      <span>uselessness <b>0</b></span>
+      <span>cycles <b>0</b></span>
+    </p>
+    
+    <p class="stats" data-frame="1" hidden>
+      <b>b81d47e 2026-03-02 feat: add integrations, logging and billing search</b>
+      <span>packages <b>10</b></span>
+      <span>avg D <b>0.47</b></span>
+      <span>pain <b>3</b></span>
+      <span>uselessness <b>0</b></span>
+      <span>cycles <b>1</b></span>
+    </p>
+    
+    <p class="stats" data-frame="2" >
+      <b>9c02e5f 2026-03-03 refactor: split integrations and remove the cycle</b>
+      <span>packages <b>4</b></span>
+      <span>avg D <b>0.21</b></span>
+      <span>pain <b>0</b></span>
+      <span>uselessness <b>0</b></span>
+      <span>cycles <b>0</b></span>
+    </p>
+    
+  </div>
+
+  <div class="grid">
+    <section class="card" aria-labelledby="h-chart">
+      <h2 id="h-chart">Abstractness × Instability</h2>
+      <svg viewBox="0 0 560.0 500.0" role="img" aria-labelledby="t-chart">
+        <title id="t-chart">Abstractness versus instability of each package, with the main sequence and the pain and uselessness zones</title>
+        <polygon class="band-pain" points="56.0,440.0 296.0,440.0 56.0,230.0"><title>Zone of pain</title></polygon>
+        <polygon class="band-use" points="536.0,20.0 296.0,20.0 536.0,230.0"><title>Zone of uselessness</title></polygon>
+        <rect class="axis" x="56.0" y="20.0" width="480.0" height="420.0"/>
+        <line class="grid-line" x1="56.0" y1="20.0" x2="56.0" y2="440.0"/><text class="tick" x="56.0" y="462.0" text-anchor="middle">0.00</text><line class="grid-line" x1="176.0" y1="20.0" x2="176.0" y2="440.0"/><text class="tick" x="176.0" y="462.0" text-anchor="middle">0.25</text><line class="grid-line" x1="296.0" y1="20.0" x2="296.0" y2="440.0"/><text class="tick" x="296.0" y="462.0" text-anchor="middle">0.50</text><line class="grid-line" x1="416.0" y1="20.0" x2="416.0" y2="440.0"/><text class="tick" x="416.0" y="462.0" text-anchor="middle">0.75</text><line class="grid-line" x1="536.0" y1="20.0" x2="536.0" y2="440.0"/><text class="tick" x="536.0" y="462.0" text-anchor="middle">1.00</text>
+        <line class="grid-line" x1="56.0" y1="440.0" x2="536.0" y2="440.0"/><text class="tick" x="48.0" y="444.0" text-anchor="end">0.00</text><line class="grid-line" x1="56.0" y1="335.0" x2="536.0" y2="335.0"/><text class="tick" x="48.0" y="339.0" text-anchor="end">0.25</text><line class="grid-line" x1="56.0" y1="230.0" x2="536.0" y2="230.0"/><text class="tick" x="48.0" y="234.0" text-anchor="end">0.50</text><line class="grid-line" x1="56.0" y1="125.0" x2="536.0" y2="125.0"/><text class="tick" x="48.0" y="129.0" text-anchor="end">0.75</text><line class="grid-line" x1="56.0" y1="20.0" x2="536.0" y2="20.0"/><text class="tick" x="48.0" y="24.0" text-anchor="end">1.00</text>
+        <line class="main-seq" x1="56.0" y1="20.0" x2="536.0" y2="440.0"><title>Main sequence (A + I = 1)</title></line>
+        <text class="axis-title" x="296.0" y="486.0" text-anchor="middle">Instability (I)</text>
+        <text class="axis-title" x="16.0" y="230.0" text-anchor="middle" transform="rotate(-90 16.0 230.0)">Abstractness (A)</text>
+        <g class="trail-group" data-pkg="api" hidden><polyline class="trail" points="536.0,440.0 536.0,440.0 536.0,440.0"/><circle class="trail-dot" cx="536.0" cy="440.0" r="3"/><circle class="trail-dot" cx="536.0" cy="440.0" r="3"/><circle class="trail-dot" cx="536.0" cy="440.0" r="3"/></g><g class="trail-group" data-pkg="auth" hidden><polyline class="trail" points="376.0,440.0 536.0,440.0"/><circle class="trail-dot" cx="376.0" cy="440.0" r="3"/><circle class="trail-dot" cx="536.0" cy="440.0" r="3"/></g><g class="trail-group" data-pkg="core" hidden><polyline class="trail" points="56.0,230.0 296.0,230.0 56.0,160.0"/><circle class="trail-dot" cx="56.0" cy="230.0" r="3"/><circle class="trail-dot" cx="296.0" cy="230.0" r="3"/><circle class="trail-dot" cx="56.0" cy="160.0" r="3"/></g><g class="trail-group" data-pkg="db" hidden><polyline class="trail" points="216.0,440.0 536.0,230.0"/><circle class="trail-dot" cx="216.0" cy="440.0" r="3"/><circle class="trail-dot" cx="536.0" cy="230.0" r="3"/></g>
+        <g data-frame="0" hidden>
+          <circle class="pt pt-main_sequence" cx="56.0" cy="230.0" r="7.0"><title>core | Ca 1, Ce 0, I 0.00, A 0.50, D 0.50 | main_sequence</title></circle><circle class="pt pt-main_sequence" cx="536.0" cy="440.0" r="4.0"><title>api | Ca 0, Ce 1, I 1.00, A 0.00, D 0.00 | main_sequence</title></circle>
+        </g><g data-frame="1" hidden>
+          <circle class="pt pt-pain" cx="56.0" cy="440.0" r="12.5"><title>log | Ca 8, Ce 0, I 0.00, A 0.00, D 1.00 | pain</title></circle><circle class="pt pt-pain" cx="216.0" cy="440.0" r="8.2"><title>billing | Ca 2, Ce 1, I 0.33, A 0.00, D 0.67 | pain</title></circle><circle class="pt pt-pain" cx="216.0" cy="440.0" r="8.2"><title>db | Ca 2, Ce 1, I 0.33, A 0.00, D 0.67 | pain</title></circle><circle class="pt pt-main_sequence" cx="296.0" cy="440.0" r="8.2"><title>search | Ca 2, Ce 2, I 0.50, A 0.00, D 0.50 | main_sequence</title></circle><circle class="pt pt-main_sequence" cx="376.0" cy="440.0" r="7.0"><title>auth | Ca 1, Ce 2, I 0.67, A 0.00, D 0.33 | main_sequence</title></circle><circle class="pt pt-main_sequence" cx="296.0" cy="440.0" r="7.0"><title>cache | Ca 1, Ce 1, I 0.50, A 0.00, D 0.50 | main_sequence</title></circle><circle class="pt pt-main_sequence" cx="296.0" cy="230.0" r="7.0"><title>core | Ca 1, Ce 1, I 0.50, A 0.50, D 0.00 | main_sequence</title></circle><circle class="pt pt-main_sequence" cx="296.0" cy="440.0" r="7.0"><title>mail | Ca 1, Ce 1, I 0.50, A 0.00, D 0.50 | main_sequence</title></circle><circle class="pt pt-main_sequence" cx="296.0" cy="440.0" r="7.0"><title>queue | Ca 1, Ce 1, I 0.50, A 0.00, D 0.50 | main_sequence</title></circle><circle class="pt pt-main_sequence" cx="536.0" cy="440.0" r="4.0"><title>api | Ca 0, Ce 9, I 1.00, A 0.00, D 0.00 | main_sequence</title></circle>
+        </g><g data-frame="2" >
+          <circle class="pt pt-main_sequence" cx="56.0" cy="160.0" r="9.2"><title>core | Ca 3, Ce 0, I 0.00, A 0.67, D 0.33 | main_sequence</title></circle><circle class="pt pt-main_sequence" cx="536.0" cy="440.0" r="4.0"><title>api | Ca 0, Ce 1, I 1.00, A 0.00, D 0.00 | main_sequence</title></circle><circle class="pt pt-main_sequence" cx="536.0" cy="440.0" r="4.0"><title>auth | Ca 0, Ce 1, I 1.00, A 0.00, D 0.00 | main_sequence</title></circle><circle class="pt pt-main_sequence" cx="536.0" cy="230.0" r="4.0"><title>db | Ca 0, Ce 1, I 1.00, A 0.50, D 0.50 | main_sequence</title></circle>
+        </g>
+      </svg>
+      <p class="note">Zone threshold D &gt; 0.50. Point size grows with Ca.</p>
+    </section>
+
+    
+    <section class="card" aria-labelledby="h-series">
+      <h2 id="h-series">Over time</h2>
+      <div class="grid">
+        
+        <figure style="margin:0">
+          <figcaption class="note">Average distance (D)</figcaption>
+          <svg viewBox="0 0 320.0 150.0" role="img" aria-label="Average distance (D)">
+            <line class="axis" x1="40.0" y1="128.0" x2="310.0" y2="128.0"/>
+            <line class="axis" x1="40.0" y1="18.0" x2="40.0" y2="128.0"/>
+            <text class="tick" x="40.0" y="18.0" text-anchor="end" dx="-4">0.5</text>
+            <text class="tick" x="40.0" y="128.0" text-anchor="end" dx="-4">0</text>
+            <polyline class="series-line" points="40.0,71.0 175.0,21.6 310.0,80.5"><title>D</title></polyline>
+            <line class="marker" data-frame="0" x1="40.0" y1="14.0" x2="40.0" y2="128.0" hidden/><line class="marker" data-frame="1" x1="175.0" y1="14.0" x2="175.0" y2="128.0" hidden/><line class="marker" data-frame="2" x1="310.0" y1="14.0" x2="310.0" y2="128.0" hidden/>
+            <text class="legend" x="40.0" y="144.0">3f9a1c2 2026-03-01</text>
+            <text class="legend" x="310.0" y="144.0" text-anchor="end">9c02e5f 2026-03-03</text>
+          </svg>
+          
+        </figure>
+        
+        <figure style="margin:0">
+          <figcaption class="note">Packages in the pain zone</figcaption>
+          <svg viewBox="0 0 320.0 150.0" role="img" aria-label="Packages in the pain zone">
+            <line class="axis" x1="40.0" y1="128.0" x2="310.0" y2="128.0"/>
+            <line class="axis" x1="40.0" y1="18.0" x2="40.0" y2="128.0"/>
+            <text class="tick" x="40.0" y="18.0" text-anchor="end" dx="-4">3</text>
+            <text class="tick" x="40.0" y="128.0" text-anchor="end" dx="-4">0</text>
+            <polyline class="series-line" points="40.0,128.0 175.0,14.0 310.0,128.0"><title>pain</title></polyline>
+            <line class="marker" data-frame="0" x1="40.0" y1="14.0" x2="40.0" y2="128.0" hidden/><line class="marker" data-frame="1" x1="175.0" y1="14.0" x2="175.0" y2="128.0" hidden/><line class="marker" data-frame="2" x1="310.0" y1="14.0" x2="310.0" y2="128.0" hidden/>
+            <text class="legend" x="40.0" y="144.0">3f9a1c2 2026-03-01</text>
+            <text class="legend" x="310.0" y="144.0" text-anchor="end">9c02e5f 2026-03-03</text>
+          </svg>
+          
+        </figure>
+        
+        <figure style="margin:0">
+          <figcaption class="note">Dependency cycles</figcaption>
+          <svg viewBox="0 0 320.0 150.0" role="img" aria-label="Dependency cycles">
+            <line class="axis" x1="40.0" y1="128.0" x2="310.0" y2="128.0"/>
+            <line class="axis" x1="40.0" y1="18.0" x2="40.0" y2="128.0"/>
+            <text class="tick" x="40.0" y="18.0" text-anchor="end" dx="-4">1</text>
+            <text class="tick" x="40.0" y="128.0" text-anchor="end" dx="-4">0</text>
+            <polyline class="series-line" points="40.0,128.0 175.0,14.0 310.0,128.0"><title>cycles</title></polyline>
+            <line class="marker" data-frame="0" x1="40.0" y1="14.0" x2="40.0" y2="128.0" hidden/><line class="marker" data-frame="1" x1="175.0" y1="14.0" x2="175.0" y2="128.0" hidden/><line class="marker" data-frame="2" x1="310.0" y1="14.0" x2="310.0" y2="128.0" hidden/>
+            <text class="legend" x="40.0" y="144.0">3f9a1c2 2026-03-01</text>
+            <text class="legend" x="310.0" y="144.0" text-anchor="end">9c02e5f 2026-03-03</text>
+          </svg>
+          
+        </figure>
+        
+        <figure style="margin:0">
+          <figcaption class="note">Diagnostics by severity</figcaption>
+          <svg viewBox="0 0 320.0 150.0" role="img" aria-label="Diagnostics by severity">
+            <line class="axis" x1="40.0" y1="128.0" x2="310.0" y2="128.0"/>
+            <line class="axis" x1="40.0" y1="18.0" x2="40.0" y2="128.0"/>
+            <text class="tick" x="40.0" y="18.0" text-anchor="end" dx="-4">4</text>
+            <text class="tick" x="40.0" y="128.0" text-anchor="end" dx="-4">0</text>
+            <polyline class="series-line series-error" points="40.0,128.0 175.0,99.5 310.0,128.0"><title>error</title></polyline><polyline class="series-line series-warning" points="40.0,128.0 175.0,14.0 310.0,128.0"><title>warning</title></polyline><polyline class="series-line series-info" points="40.0,128.0 175.0,128.0 310.0,128.0"><title>info</title></polyline>
+            <line class="marker" data-frame="0" x1="40.0" y1="14.0" x2="40.0" y2="128.0" hidden/><line class="marker" data-frame="1" x1="175.0" y1="14.0" x2="175.0" y2="128.0" hidden/><line class="marker" data-frame="2" x1="310.0" y1="14.0" x2="310.0" y2="128.0" hidden/>
+            <text class="legend" x="40.0" y="144.0">3f9a1c2 2026-03-01</text>
+            <text class="legend" x="310.0" y="144.0" text-anchor="end">9c02e5f 2026-03-03</text>
+          </svg>
+          <p class="note"><span class="sev sev-error">error</span> <span class="sev sev-warning">warning</span> <span class="sev sev-info">info</span> </p>
+        </figure>
+        
+      </div>
+    </section>
+    
+  </div>
+
+  <section class="card" aria-labelledby="h-graph">
+    <h2 id="h-graph">Dependency graph</h2>
+    <p class="note">Arrows point from importer to imported package. Columns group packages by instability. Red edges are inside a cycle; dashed amber edges violate the stable dependencies principle.</p>
+    
+    <div class="scroll" data-frame="0" hidden>
+      
+      <svg class="dep-graph" viewBox="0 0 1120.0 70.0" role="img" aria-label="Dependency graph of 3f9a1c2 2026-03-01 feat: add api and core packages">
+        <text class="col-title" x="12.0" y="16">I ≥ 0.8</text><text class="col-title" x="244.0" y="16">I 0.6–0.8</text><text class="col-title" x="476.0" y="16">I 0.4–0.6</text><text class="col-title" x="708.0" y="16">I 0.2–0.4</text><text class="col-title" x="940.0" y="16">I &lt; 0.2</text>
+        <line class="edge" data-a="g1" data-b="g2" x1="180.0" y1="41.0" x2="940.0" y2="41.0" marker-end="url(#m-arrow)"/>
+        <g class="node node-main_sequence" data-id="g1" data-nb="g2" tabindex="0"><title>api | I 1.00, A 0.00, main_sequence</title><rect x="12.0" y="30.0" width="168.0" height="22.0" rx="4"/><text x="20.0" y="45.0">api</text></g><g class="node node-main_sequence" data-id="g2" data-nb="g1" tabindex="0"><title>core | I 0.00, A 0.50, main_sequence</title><rect x="940.0" y="30.0" width="168.0" height="22.0" rx="4"/><text x="948.0" y="45.0">core</text></g>
+      </svg>
+      
+    </div>
+    
+    <div class="scroll" data-frame="1" hidden>
+      
+      <svg class="dep-graph" viewBox="0 0 1120.0 190.0" role="img" aria-label="Dependency graph of b81d47e 2026-03-02 feat: add integrations, logging and billing search">
+        <text class="col-title" x="12.0" y="16">I ≥ 0.8</text><text class="col-title" x="244.0" y="16">I 0.6–0.8</text><text class="col-title" x="476.0" y="16">I 0.4–0.6</text><text class="col-title" x="708.0" y="16">I 0.2–0.4</text><text class="col-title" x="940.0" y="16">I &lt; 0.2</text>
+        <line class="edge" data-a="g1" data-b="g2" x1="180.0" y1="41.0" x2="244.0" y2="41.0" marker-end="url(#m-arrow)"/><line class="edge" data-a="g1" data-b="g3" x1="180.0" y1="41.0" x2="708.0" y2="41.0" marker-end="url(#m-arrow)"/><line class="edge" data-a="g1" data-b="g4" x1="180.0" y1="41.0" x2="476.0" y2="41.0" marker-end="url(#m-arrow)"/><line class="edge" data-a="g1" data-b="g5" x1="180.0" y1="41.0" x2="476.0" y2="71.0" marker-end="url(#m-arrow)"/><line class="edge" data-a="g1" data-b="g6" x1="180.0" y1="41.0" x2="708.0" y2="71.0" marker-end="url(#m-arrow)"/><line class="edge" data-a="g1" data-b="g7" x1="180.0" y1="41.0" x2="940.0" y2="41.0" marker-end="url(#m-arrow)"/><line class="edge" data-a="g1" data-b="g8" x1="180.0" y1="41.0" x2="476.0" y2="101.0" marker-end="url(#m-arrow)"/><line class="edge" data-a="g1" data-b="g9" x1="180.0" y1="41.0" x2="476.0" y2="131.0" marker-end="url(#m-arrow)"/><line class="edge" data-a="g1" data-b="g10" x1="180.0" y1="41.0" x2="476.0" y2="161.0" marker-end="url(#m-arrow)"/><line class="edge" data-a="g2" data-b="g6" x1="412.0" y1="41.0" x2="708.0" y2="71.0" marker-end="url(#m-arrow)"/><line class="edge" data-a="g2" data-b="g7" x1="412.0" y1="41.0" x2="940.0" y2="41.0" marker-end="url(#m-arrow)"/><line class="edge edge-cycle" data-a="g3" data-b="g10" x1="708.0" y1="41.0" x2="644.0" y2="161.0" marker-end="url(#m-arrow-cycle)"/><line class="edge" data-a="g4" data-b="g7" x1="644.0" y1="41.0" x2="940.0" y2="41.0" marker-end="url(#m-arrow)"/><line class="edge" data-a="g5" data-b="g7" x1="644.0" y1="71.0" x2="940.0" y2="41.0" marker-end="url(#m-arrow)"/><line class="edge" data-a="g6" data-b="g7" x1="876.0" y1="71.0" x2="940.0" y2="41.0" marker-end="url(#m-arrow)"/><line class="edge" data-a="g8" data-b="g7" x1="644.0" y1="101.0" x2="940.0" y2="41.0" marker-end="url(#m-arrow)"/><line class="edge" data-a="g9" data-b="g7" x1="644.0" y1="131.0" x2="940.0" y2="41.0" marker-end="url(#m-arrow)"/><line class="edge edge-cycle" data-a="g10" data-b="g3" x1="644.0" y1="161.0" x2="708.0" y2="41.0" marker-end="url(#m-arrow-cycle)"/><line class="edge" data-a="g10" data-b="g7" x1="644.0" y1="161.0" x2="940.0" y2="41.0" marker-end="url(#m-arrow)"/>
+        <g class="node node-main_sequence" data-id="g1" data-nb="g10 g2 g3 g4 g5 g6 g7 g8 g9" tabindex="0"><title>api | I 1.00, A 0.00, main_sequence</title><rect x="12.0" y="30.0" width="168.0" height="22.0" rx="4"/><text x="20.0" y="45.0">api</text></g><g class="node node-main_sequence" data-id="g2" data-nb="g1 g6 g7" tabindex="0"><title>auth | I 0.67, A 0.00, main_sequence</title><rect x="244.0" y="30.0" width="168.0" height="22.0" rx="4"/><text x="252.0" y="45.0">auth</text></g><g class="node node-pain" data-id="g3" data-nb="g1 g10 g10" tabindex="0"><title>billing | I 0.33, A 0.00, pain</title><rect x="708.0" y="30.0" width="168.0" height="22.0" rx="4"/><text x="716.0" y="45.0">billing</text></g><g class="node node-main_sequence" data-id="g4" data-nb="g1 g7" tabindex="0"><title>cache | I 0.50, A 0.00, main_sequence</title><rect x="476.0" y="30.0" width="168.0" height="22.0" rx="4"/><text x="484.0" y="45.0">cache</text></g><g class="node node-main_sequence" data-id="g5" data-nb="g1 g7" tabindex="0"><title>core | I 0.50, A 0.50, main_sequence</title><rect x="476.0" y="60.0" width="168.0" height="22.0" rx="4"/><text x="484.0" y="75.0">core</text></g><g class="node node-pain" data-id="g6" data-nb="g1 g2 g7" tabindex="0"><title>db | I 0.33, A 0.00, pain</title><rect x="708.0" y="60.0" width="168.0" height="22.0" rx="4"/><text x="716.0" y="75.0">db</text></g><g class="node node-pain" data-id="g7" data-nb="g1 g10 g2 g4 g5 g6 g8 g9" tabindex="0"><title>log | I 0.00, A 0.00, pain</title><rect x="940.0" y="30.0" width="168.0" height="22.0" rx="4"/><text x="948.0" y="45.0">log</text></g><g class="node node-main_sequence" data-id="g8" data-nb="g1 g7" tabindex="0"><title>mail | I 0.50, A 0.00, main_sequence</title><rect x="476.0" y="90.0" width="168.0" height="22.0" rx="4"/><text x="484.0" y="105.0">mail</text></g><g class="node node-main_sequence" data-id="g9" data-nb="g1 g7" tabindex="0"><title>queue | I 0.50, A 0.00, main_sequence</title><rect x="476.0" y="120.0" width="168.0" height="22.0" rx="4"/><text x="484.0" y="135.0">queue</text></g><g class="node node-main_sequence" data-id="g10" data-nb="g1 g3 g3 g7" tabindex="0"><title>search | I 0.50, A 0.00, main_sequence</title><rect x="476.0" y="150.0" width="168.0" height="22.0" rx="4"/><text x="484.0" y="165.0">search</text></g>
+      </svg>
+      
+    </div>
+    
+    <div class="scroll" data-frame="2" >
+      
+      <svg class="dep-graph" viewBox="0 0 1120.0 130.0" role="img" aria-label="Dependency graph of 9c02e5f 2026-03-03 refactor: split integrations and remove the cycle">
+        <text class="col-title" x="12.0" y="16">I ≥ 0.8</text><text class="col-title" x="244.0" y="16">I 0.6–0.8</text><text class="col-title" x="476.0" y="16">I 0.4–0.6</text><text class="col-title" x="708.0" y="16">I 0.2–0.4</text><text class="col-title" x="940.0" y="16">I &lt; 0.2</text>
+        <line class="edge" data-a="g1" data-b="g3" x1="180.0" y1="41.0" x2="940.0" y2="41.0" marker-end="url(#m-arrow)"/><line class="edge" data-a="g2" data-b="g3" x1="180.0" y1="71.0" x2="940.0" y2="41.0" marker-end="url(#m-arrow)"/><line class="edge" data-a="g4" data-b="g3" x1="180.0" y1="101.0" x2="940.0" y2="41.0" marker-end="url(#m-arrow)"/>
+        <g class="node node-main_sequence" data-id="g1" data-nb="g3" tabindex="0"><title>api | I 1.00, A 0.00, main_sequence</title><rect x="12.0" y="30.0" width="168.0" height="22.0" rx="4"/><text x="20.0" y="45.0">api</text></g><g class="node node-main_sequence" data-id="g2" data-nb="g3" tabindex="0"><title>auth | I 1.00, A 0.00, main_sequence</title><rect x="12.0" y="60.0" width="168.0" height="22.0" rx="4"/><text x="20.0" y="75.0">auth</text></g><g class="node node-main_sequence" data-id="g3" data-nb="g1 g2 g4" tabindex="0"><title>core | I 0.00, A 0.67, main_sequence</title><rect x="940.0" y="30.0" width="168.0" height="22.0" rx="4"/><text x="948.0" y="45.0">core</text></g><g class="node node-main_sequence" data-id="g4" data-nb="g3" tabindex="0"><title>db | I 1.00, A 0.50, main_sequence</title><rect x="12.0" y="90.0" width="168.0" height="22.0" rx="4"/><text x="20.0" y="105.0">db</text></g>
+      </svg>
+      
+    </div>
+    
+  </section>
+
+  <section class="card" aria-labelledby="h-pkgs">
+    <h2 id="h-pkgs">Packages</h2>
+    
+    <div class="scroll" data-frame="0" hidden>
+      <table class="sortable">
+        <thead><tr>
+          <th scope="col"><button type="button">Package</button></th>
+          <th scope="col" data-num="1"><button type="button">Ca</button></th>
+          <th scope="col" data-num="1"><button type="button">Ce</button></th>
+          <th scope="col" data-num="1"><button type="button">I</button></th>
+          <th scope="col" data-num="1"><button type="button">Na</button></th>
+          <th scope="col" data-num="1"><button type="button">Nc</button></th>
+          <th scope="col" data-num="1"><button type="button">A</button></th>
+          <th scope="col" data-num="1"><button type="button">D</button></th>
+          <th scope="col"><button type="button">Zone</button></th>
+        </tr></thead>
+        <tbody>
+        <tr>
+          <td data-sort="core">core</td>
+          <td data-sort="1">1</td>
+          <td data-sort="0">0</td>
+          <td data-sort="0.0000">0.00</td>
+          <td data-sort="1">1</td>
+          <td data-sort="2">2</td>
+          <td data-sort="0.5000">0.50</td>
+          <td data-sort="0.5000">0.50</td>
+          <td data-sort="main_sequence" class="zone-main_sequence">main_sequence</td>
+        </tr><tr>
+          <td data-sort="api">api</td>
+          <td data-sort="0">0</td>
+          <td data-sort="1">1</td>
+          <td data-sort="1.0000">1.00</td>
+          <td data-sort="0">0</td>
+          <td data-sort="1">1</td>
+          <td data-sort="0.0000">0.00</td>
+          <td data-sort="0.0000">0.00</td>
+          <td data-sort="main_sequence" class="zone-main_sequence">main_sequence</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+    
+    <div class="scroll" data-frame="1" hidden>
+      <table class="sortable">
+        <thead><tr>
+          <th scope="col"><button type="button">Package</button></th>
+          <th scope="col" data-num="1"><button type="button">Ca</button></th>
+          <th scope="col" data-num="1"><button type="button">Ce</button></th>
+          <th scope="col" data-num="1"><button type="button">I</button></th>
+          <th scope="col" data-num="1"><button type="button">Na</button></th>
+          <th scope="col" data-num="1"><button type="button">Nc</button></th>
+          <th scope="col" data-num="1"><button type="button">A</button></th>
+          <th scope="col" data-num="1"><button type="button">D</button></th>
+          <th scope="col"><button type="button">Zone</button></th>
+        </tr></thead>
+        <tbody>
+        <tr>
+          <td data-sort="log">log</td>
+          <td data-sort="8">8</td>
+          <td data-sort="0">0</td>
+          <td data-sort="0.0000">0.00</td>
+          <td data-sort="0">0</td>
+          <td data-sort="1">1</td>
+          <td data-sort="0.0000">0.00</td>
+          <td data-sort="1.0000">1.00</td>
+          <td data-sort="pain" class="zone-pain">pain</td>
+        </tr><tr>
+          <td data-sort="billing">billing</td>
+          <td data-sort="2">2</td>
+          <td data-sort="1">1</td>
+          <td data-sort="0.3333">0.33</td>
+          <td data-sort="0">0</td>
+          <td data-sort="1">1</td>
+          <td data-sort="0.0000">0.00</td>
+          <td data-sort="0.6667">0.67</td>
+          <td data-sort="pain" class="zone-pain">pain</td>
+        </tr><tr>
+          <td data-sort="db">db</td>
+          <td data-sort="2">2</td>
+          <td data-sort="1">1</td>
+          <td data-sort="0.3333">0.33</td>
+          <td data-sort="0">0</td>
+          <td data-sort="2">2</td>
+          <td data-sort="0.0000">0.00</td>
+          <td data-sort="0.6667">0.67</td>
+          <td data-sort="pain" class="zone-pain">pain</td>
+        </tr><tr>
+          <td data-sort="cache">cache</td>
+          <td data-sort="1">1</td>
+          <td data-sort="1">1</td>
+          <td data-sort="0.5000">0.50</td>
+          <td data-sort="0">0</td>
+          <td data-sort="1">1</td>
+          <td data-sort="0.0000">0.00</td>
+          <td data-sort="0.5000">0.50</td>
+          <td data-sort="main_sequence" class="zone-main_sequence">main_sequence</td>
+        </tr><tr>
+          <td data-sort="mail">mail</td>
+          <td data-sort="1">1</td>
+          <td data-sort="1">1</td>
+          <td data-sort="0.5000">0.50</td>
+          <td data-sort="0">0</td>
+          <td data-sort="1">1</td>
+          <td data-sort="0.0000">0.00</td>
+          <td data-sort="0.5000">0.50</td>
+          <td data-sort="main_sequence" class="zone-main_sequence">main_sequence</td>
+        </tr><tr>
+          <td data-sort="queue">queue</td>
+          <td data-sort="1">1</td>
+          <td data-sort="1">1</td>
+          <td data-sort="0.5000">0.50</td>
+          <td data-sort="0">0</td>
+          <td data-sort="1">1</td>
+          <td data-sort="0.0000">0.00</td>
+          <td data-sort="0.5000">0.50</td>
+          <td data-sort="main_sequence" class="zone-main_sequence">main_sequence</td>
+        </tr><tr>
+          <td data-sort="search">search</td>
+          <td data-sort="2">2</td>
+          <td data-sort="2">2</td>
+          <td data-sort="0.5000">0.50</td>
+          <td data-sort="0">0</td>
+          <td data-sort="1">1</td>
+          <td data-sort="0.0000">0.00</td>
+          <td data-sort="0.5000">0.50</td>
+          <td data-sort="main_sequence" class="zone-main_sequence">main_sequence</td>
+        </tr><tr>
+          <td data-sort="auth">auth</td>
+          <td data-sort="1">1</td>
+          <td data-sort="2">2</td>
+          <td data-sort="0.6667">0.67</td>
+          <td data-sort="0">0</td>
+          <td data-sort="1">1</td>
+          <td data-sort="0.0000">0.00</td>
+          <td data-sort="0.3333">0.33</td>
+          <td data-sort="main_sequence" class="zone-main_sequence">main_sequence</td>
+        </tr><tr>
+          <td data-sort="api">api</td>
+          <td data-sort="0">0</td>
+          <td data-sort="9">9</td>
+          <td data-sort="1.0000">1.00</td>
+          <td data-sort="0">0</td>
+          <td data-sort="1">1</td>
+          <td data-sort="0.0000">0.00</td>
+          <td data-sort="0.0000">0.00</td>
+          <td data-sort="main_sequence" class="zone-main_sequence">main_sequence</td>
+        </tr><tr>
+          <td data-sort="core">core</td>
+          <td data-sort="1">1</td>
+          <td data-sort="1">1</td>
+          <td data-sort="0.5000">0.50</td>
+          <td data-sort="1">1</td>
+          <td data-sort="2">2</td>
+          <td data-sort="0.5000">0.50</td>
+          <td data-sort="0.0000">0.00</td>
+          <td data-sort="main_sequence" class="zone-main_sequence">main_sequence</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+    
+    <div class="scroll" data-frame="2" >
+      <table class="sortable">
+        <thead><tr>
+          <th scope="col"><button type="button">Package</button></th>
+          <th scope="col" data-num="1"><button type="button">Ca</button></th>
+          <th scope="col" data-num="1"><button type="button">Ce</button></th>
+          <th scope="col" data-num="1"><button type="button">I</button></th>
+          <th scope="col" data-num="1"><button type="button">Na</button></th>
+          <th scope="col" data-num="1"><button type="button">Nc</button></th>
+          <th scope="col" data-num="1"><button type="button">A</button></th>
+          <th scope="col" data-num="1"><button type="button">D</button></th>
+          <th scope="col"><button type="button">Zone</button></th>
+        </tr></thead>
+        <tbody>
+        <tr>
+          <td data-sort="db">db</td>
+          <td data-sort="0">0</td>
+          <td data-sort="1">1</td>
+          <td data-sort="1.0000">1.00</td>
+          <td data-sort="1">1</td>
+          <td data-sort="2">2</td>
+          <td data-sort="0.5000">0.50</td>
+          <td data-sort="0.5000">0.50</td>
+          <td data-sort="main_sequence" class="zone-main_sequence">main_sequence</td>
+        </tr><tr>
+          <td data-sort="core">core</td>
+          <td data-sort="3">3</td>
+          <td data-sort="0">0</td>
+          <td data-sort="0.0000">0.00</td>
+          <td data-sort="2">2</td>
+          <td data-sort="3">3</td>
+          <td data-sort="0.6667">0.67</td>
+          <td data-sort="0.3333">0.33</td>
+          <td data-sort="main_sequence" class="zone-main_sequence">main_sequence</td>
+        </tr><tr>
+          <td data-sort="api">api</td>
+          <td data-sort="0">0</td>
+          <td data-sort="1">1</td>
+          <td data-sort="1.0000">1.00</td>
+          <td data-sort="0">0</td>
+          <td data-sort="1">1</td>
+          <td data-sort="0.0000">0.00</td>
+          <td data-sort="0.0000">0.00</td>
+          <td data-sort="main_sequence" class="zone-main_sequence">main_sequence</td>
+        </tr><tr>
+          <td data-sort="auth">auth</td>
+          <td data-sort="0">0</td>
+          <td data-sort="1">1</td>
+          <td data-sort="1.0000">1.00</td>
+          <td data-sort="0">0</td>
+          <td data-sort="1">1</td>
+          <td data-sort="0.0000">0.00</td>
+          <td data-sort="0.0000">0.00</td>
+          <td data-sort="main_sequence" class="zone-main_sequence">main_sequence</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+    
+  </section>
+
+  <section class="card" aria-labelledby="h-diags">
+    <h2 id="h-diags">Diagnostics</h2>
+    
+    <div data-frame="0" hidden>
+      <p class="note">No diagnostics.</p>
+    </div>
+    
+    <div data-frame="1" hidden>
+      <ul class="diags">
+        <li><span class="sev sev-warning">warning</span> <b>god-package</b> <code>api</code>: package imports 9 packages (threshold 8) and knows too much</li><li><span class="sev sev-error">error</span> <b>dependency-cycle</b> <code>billing</code>: import cycle: example.com/demo/billing -&gt; example.com/demo/search -&gt; example.com/demo/billing</li><li><span class="sev sev-warning">warning</span> <b>sdp-violation</b> <code>billing</code>: depends on example.com/demo/search, which is less stable (I 0.50 &gt; 0.33)</li><li><span class="sev sev-warning">warning</span> <b>concrete-hotspot</b> <code>log</code>: package without abstractions is imported directly by 8 packages</li><li><span class="sev sev-warning">warning</span> <b>pain-zone</b> <code>log</code>: stable and concrete package used by 8 packages; introduce a contract (interface) consumed by the dependents or inject the dependency</li>
+      </ul>
+    </div>
+    
+    <div data-frame="2" >
+      <p class="note">No diagnostics.</p>
+    </div>
+    
+  </section>
+</main>
+<script>(function () {
+  var slider = document.getElementById("frame");
+  var trail = document.getElementById("trail");
+
+  function setHidden(el, hidden) {
+    if (hidden) { el.setAttribute("hidden", ""); } else { el.removeAttribute("hidden"); }
+  }
+
+  function showFrame(i) {
+    document.querySelectorAll("[data-frame]").forEach(function (el) {
+      setHidden(el, el.getAttribute("data-frame") !== String(i));
+    });
+  }
+  if (slider) {
+    slider.addEventListener("input", function () { showFrame(slider.value); });
+    showFrame(slider.value);
+  }
+  if (trail) {
+    trail.addEventListener("change", function () {
+      document.querySelectorAll("g.trail-group").forEach(function (g) {
+        setHidden(g, g.getAttribute("data-pkg") !== trail.value);
+      });
+    });
+  }
+
+  document.querySelectorAll("table.sortable th button").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var th = btn.parentNode;
+      var table = th.closest("table");
+      var idx = Array.prototype.indexOf.call(th.parentNode.children, th);
+      var numeric = th.getAttribute("data-num") === "1";
+      var dir = th.getAttribute("data-dir") === "asc" ? "desc" : "asc";
+      th.parentNode.querySelectorAll("th").forEach(function (h) {
+        h.removeAttribute("data-dir");
+        h.removeAttribute("aria-sort");
+      });
+      th.setAttribute("data-dir", dir);
+      th.setAttribute("aria-sort", dir === "asc" ? "ascending" : "descending");
+      var body = table.tBodies[0];
+      var rows = Array.prototype.slice.call(body.rows);
+      rows.sort(function (a, b) {
+        var x = a.cells[idx].getAttribute("data-sort");
+        var y = b.cells[idx].getAttribute("data-sort");
+        var c;
+        if (numeric) { c = (parseFloat(x) || 0) - (parseFloat(y) || 0); }
+        else { c = x < y ? -1 : (x > y ? 1 : 0); }
+        return dir === "asc" ? c : -c;
+      });
+      rows.forEach(function (r) { body.appendChild(r); });
+    });
+  });
+
+  document.querySelectorAll("svg.dep-graph").forEach(function (svg) {
+    function clear() {
+      svg.classList.remove("dim");
+      svg.querySelectorAll(".hl").forEach(function (el) { el.classList.remove("hl"); });
+    }
+    svg.querySelectorAll("g.node").forEach(function (node) {
+      function on() {
+        clear();
+        svg.classList.add("dim");
+        var id = node.getAttribute("data-id");
+        var near = (node.getAttribute("data-nb") || "").split(" ");
+        node.classList.add("hl");
+        svg.querySelectorAll("g.node").forEach(function (o) {
+          if (near.indexOf(o.getAttribute("data-id")) >= 0) { o.classList.add("hl"); }
+        });
+        svg.querySelectorAll(".edge").forEach(function (e) {
+          if (e.getAttribute("data-a") === id || e.getAttribute("data-b") === id) { e.classList.add("hl"); }
+        });
+      }
+      node.addEventListener("mouseenter", on);
+      node.addEventListener("focus", on);
+      node.addEventListener("mouseleave", clear);
+      node.addEventListener("blur", clear);
+    });
+  });
+})();
+</script>
+</body>
+</html>

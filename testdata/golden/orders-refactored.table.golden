@@ -1,0 +1,12 @@
+PACKAGE                                          Ca  Ce  I     Na  Nc  A     D     ZONE
+example.com/ordersrefactored/internal/catalog    1   1   0.50  0   1   0.00  0.50  main_sequence
+example.com/ordersrefactored/internal/logger     1   1   0.50  0   1   0.00  0.50  main_sequence
+example.com/ordersrefactored/internal/notify     1   1   0.50  0   1   0.00  0.50  main_sequence
+example.com/ordersrefactored/internal/order      1   1   0.50  0   1   0.00  0.50  main_sequence
+example.com/ordersrefactored/internal/payment    1   1   0.50  0   1   0.00  0.50  main_sequence
+example.com/ordersrefactored/internal/contracts  5   0   0.00  4   5   0.80  0.20  main_sequence
+example.com/ordersrefactored/cmd/orders          0   5   1.00  0   0   0.00  0.00  main_sequence
+
+Summary: packages=7 avg_distance=0.39 pain=0 uselessness=0 main_sequence=7 isolated=0 cycles=0
+
+Diagnostics (0)

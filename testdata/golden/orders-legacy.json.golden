@@ -1,0 +1,405 @@
+{
+  "schema_version": "1",
+  "tool_version": "dev",
+  "module": "example.com/orderslegacy",
+  "config": {
+    "distance_threshold": 0.5,
+    "include_external": false,
+    "include_tests": false,
+    "exported_only": false
+  },
+  "packages": [
+    {
+      "path": "example.com/orderslegacy/internal/audit",
+      "is_main": false,
+      "ca": 1,
+      "ce": 2,
+      "instability": 0.6667,
+      "na": 0,
+      "nc": 1,
+      "abstractness": 0,
+      "distance": 0.3333,
+      "zone": "main_sequence",
+      "imports": [
+        "example.com/orderslegacy/internal/db",
+        "example.com/orderslegacy/internal/logger"
+      ],
+      "imported_by": [
+        "example.com/orderslegacy/internal/order"
+      ]
+    },
+    {
+      "path": "example.com/orderslegacy/internal/catalog",
+      "is_main": false,
+      "ca": 1,
+      "ce": 2,
+      "instability": 0.6667,
+      "na": 0,
+      "nc": 1,
+      "abstractness": 0,
+      "distance": 0.3333,
+      "zone": "main_sequence",
+      "imports": [
+        "example.com/orderslegacy/internal/db",
+        "example.com/orderslegacy/internal/logger"
+      ],
+      "imported_by": [
+        "example.com/orderslegacy/internal/order"
+      ]
+    },
+    {
+      "path": "example.com/orderslegacy/internal/contracts",
+      "is_main": false,
+      "ca": 0,
+      "ce": 1,
+      "instability": 1,
+      "na": 2,
+      "nc": 2,
+      "abstractness": 1,
+      "distance": 1,
+      "zone": "uselessness",
+      "imports": [
+        "example.com/orderslegacy/internal/customer"
+      ],
+      "imported_by": []
+    },
+    {
+      "path": "example.com/orderslegacy/internal/customer",
+      "is_main": false,
+      "ca": 2,
+      "ce": 2,
+      "instability": 0.5,
+      "na": 0,
+      "nc": 1,
+      "abstractness": 0,
+      "distance": 0.5,
+      "zone": "main_sequence",
+      "imports": [
+        "example.com/orderslegacy/internal/logger",
+        "example.com/orderslegacy/internal/promo"
+      ],
+      "imported_by": [
+        "example.com/orderslegacy/internal/contracts",
+        "example.com/orderslegacy/internal/order"
+      ]
+    },
+    {
+      "path": "example.com/orderslegacy/internal/db",
+      "is_main": false,
+      "ca": 4,
+      "ce": 1,
+      "instability": 0.2,
+      "na": 1,
+      "nc": 2,
+      "abstractness": 0.5,
+      "distance": 0.3,
+      "zone": "main_sequence",
+      "imports": [
+        "example.com/orderslegacy/internal/logger"
+      ],
+      "imported_by": [
+        "example.com/orderslegacy/internal/audit",
+        "example.com/orderslegacy/internal/catalog",
+        "example.com/orderslegacy/internal/order",
+        "example.com/orderslegacy/internal/stock"
+      ]
+    },
+    {
+      "path": "example.com/orderslegacy/internal/logger",
+      "is_main": false,
+      "ca": 10,
+      "ce": 0,
+      "instability": 0,
+      "na": 0,
+      "nc": 1,
+      "abstractness": 0,
+      "distance": 1,
+      "zone": "pain",
+      "imports": [],
+      "imported_by": [
+        "example.com/orderslegacy/internal/audit",
+        "example.com/orderslegacy/internal/catalog",
+        "example.com/orderslegacy/internal/customer",
+        "example.com/orderslegacy/internal/db",
+        "example.com/orderslegacy/internal/notify",
+        "example.com/orderslegacy/internal/order",
+        "example.com/orderslegacy/internal/payment",
+        "example.com/orderslegacy/internal/promo",
+        "example.com/orderslegacy/internal/shipping",
+        "example.com/orderslegacy/internal/stock"
+      ]
+    },
+    {
+      "path": "example.com/orderslegacy/internal/notify",
+      "is_main": false,
+      "ca": 1,
+      "ce": 1,
+      "instability": 0.5,
+      "na": 1,
+      "nc": 2,
+      "abstractness": 0.5,
+      "distance": 0,
+      "zone": "main_sequence",
+      "imports": [
+        "example.com/orderslegacy/internal/logger"
+      ],
+      "imported_by": [
+        "example.com/orderslegacy/internal/order"
+      ]
+    },
+    {
+      "path": "example.com/orderslegacy/internal/order",
+      "is_main": false,
+      "ca": 0,
+      "ce": 10,
+      "instability": 1,
+      "na": 0,
+      "nc": 1,
+      "abstractness": 0,
+      "distance": 0,
+      "zone": "main_sequence",
+      "imports": [
+        "example.com/orderslegacy/internal/audit",
+        "example.com/orderslegacy/internal/catalog",
+        "example.com/orderslegacy/internal/customer",
+        "example.com/orderslegacy/internal/db",
+        "example.com/orderslegacy/internal/logger",
+        "example.com/orderslegacy/internal/notify",
+        "example.com/orderslegacy/internal/payment",
+        "example.com/orderslegacy/internal/promo",
+        "example.com/orderslegacy/internal/shipping",
+        "example.com/orderslegacy/internal/stock"
+      ],
+      "imported_by": []
+    },
+    {
+      "path": "example.com/orderslegacy/internal/payment",
+      "is_main": false,
+      "ca": 1,
+      "ce": 1,
+      "instability": 0.5,
+      "na": 1,
+      "nc": 2,
+      "abstractness": 0.5,
+      "distance": 0,
+      "zone": "main_sequence",
+      "imports": [
+        "example.com/orderslegacy/internal/logger"
+      ],
+      "imported_by": [
+        "example.com/orderslegacy/internal/order"
+      ]
+    },
+    {
+      "path": "example.com/orderslegacy/internal/promo",
+      "is_main": false,
+      "ca": 2,
+      "ce": 1,
+      "instability": 0.3333,
+      "na": 0,
+      "nc": 0,
+      "abstractness": 0,
+      "distance": 0.6667,
+      "zone": "pain",
+      "imports": [
+        "example.com/orderslegacy/internal/logger"
+      ],
+      "imported_by": [
+        "example.com/orderslegacy/internal/customer",
+        "example.com/orderslegacy/internal/order"
+      ]
+    },
+    {
+      "path": "example.com/orderslegacy/internal/shipping",
+      "is_main": false,
+      "ca": 1,
+      "ce": 1,
+      "instability": 0.5,
+      "na": 0,
+      "nc": 1,
+      "abstractness": 0,
+      "distance": 0.5,
+      "zone": "main_sequence",
+      "imports": [
+        "example.com/orderslegacy/internal/logger"
+      ],
+      "imported_by": [
+        "example.com/orderslegacy/internal/order"
+      ]
+    },
+    {
+      "path": "example.com/orderslegacy/internal/stock",
+      "is_main": false,
+      "ca": 1,
+      "ce": 2,
+      "instability": 0.6667,
+      "na": 0,
+      "nc": 1,
+      "abstractness": 0,
+      "distance": 0.3333,
+      "zone": "main_sequence",
+      "imports": [
+        "example.com/orderslegacy/internal/db",
+        "example.com/orderslegacy/internal/logger"
+      ],
+      "imported_by": [
+        "example.com/orderslegacy/internal/order"
+      ]
+    }
+  ],
+  "cycles": [],
+  "diagnostics": [
+    {
+      "id": "uselessness-zone",
+      "severity": "warning",
+      "package": "example.com/orderslegacy/internal/contracts",
+      "message": "abstract and unstable package; consider removing abstractions that have no consumers",
+      "evidence": {
+        "abstractness": 1,
+        "ca": 0,
+        "ce": 1,
+        "distance": 1,
+        "instability": 1
+      }
+    },
+    {
+      "id": "wasted-abstraction",
+      "severity": "warning",
+      "package": "example.com/orderslegacy/internal/contracts",
+      "message": "interface Clock has no consumers outside its package",
+      "evidence": {
+        "concrete_refs": 0,
+        "concrete_used_by": [],
+        "iface_refs": 0,
+        "implementers": [],
+        "interface": "Clock",
+        "referenced_by": []
+      }
+    },
+    {
+      "id": "wasted-abstraction",
+      "severity": "warning",
+      "package": "example.com/orderslegacy/internal/contracts",
+      "message": "interface CustomerLookup has no consumers outside its package",
+      "evidence": {
+        "concrete_refs": 0,
+        "concrete_used_by": [],
+        "iface_refs": 0,
+        "implementers": [],
+        "interface": "CustomerLookup",
+        "referenced_by": []
+      }
+    },
+    {
+      "id": "concrete-hotspot",
+      "severity": "warning",
+      "package": "example.com/orderslegacy/internal/logger",
+      "message": "package without abstractions is imported directly by 10 packages",
+      "evidence": {
+        "abstractness": 0,
+        "ca": 10,
+        "imported_by": [
+          "example.com/orderslegacy/internal/audit",
+          "example.com/orderslegacy/internal/catalog",
+          "example.com/orderslegacy/internal/customer",
+          "example.com/orderslegacy/internal/db",
+          "example.com/orderslegacy/internal/notify",
+          "example.com/orderslegacy/internal/order",
+          "example.com/orderslegacy/internal/payment",
+          "example.com/orderslegacy/internal/promo",
+          "example.com/orderslegacy/internal/shipping",
+          "example.com/orderslegacy/internal/stock"
+        ]
+      }
+    },
+    {
+      "id": "pain-zone",
+      "severity": "warning",
+      "package": "example.com/orderslegacy/internal/logger",
+      "message": "stable and concrete package used by 10 packages; introduce a contract (interface) consumed by the dependents or inject the dependency",
+      "evidence": {
+        "abstractness": 0,
+        "ca": 10,
+        "ce": 0,
+        "distance": 1,
+        "imported_by": [
+          "example.com/orderslegacy/internal/audit",
+          "example.com/orderslegacy/internal/catalog",
+          "example.com/orderslegacy/internal/customer",
+          "example.com/orderslegacy/internal/db",
+          "example.com/orderslegacy/internal/notify",
+          "example.com/orderslegacy/internal/order",
+          "example.com/orderslegacy/internal/payment",
+          "example.com/orderslegacy/internal/promo",
+          "example.com/orderslegacy/internal/shipping",
+          "example.com/orderslegacy/internal/stock"
+        ],
+        "instability": 0
+      }
+    },
+    {
+      "id": "wasted-abstraction",
+      "severity": "warning",
+      "package": "example.com/orderslegacy/internal/notify",
+      "message": "interface Notifier has no consumers outside its package",
+      "evidence": {
+        "concrete_refs": 0,
+        "concrete_used_by": [],
+        "iface_refs": 0,
+        "implementers": [
+          "example.com/orderslegacy/internal/notify.emailNotifier"
+        ],
+        "interface": "Notifier",
+        "referenced_by": []
+      }
+    },
+    {
+      "id": "god-package",
+      "severity": "warning",
+      "package": "example.com/orderslegacy/internal/order",
+      "message": "package imports 10 packages (threshold 8) and knows too much",
+      "evidence": {
+        "ce": 10,
+        "imports": [
+          "example.com/orderslegacy/internal/audit",
+          "example.com/orderslegacy/internal/catalog",
+          "example.com/orderslegacy/internal/customer",
+          "example.com/orderslegacy/internal/db",
+          "example.com/orderslegacy/internal/logger",
+          "example.com/orderslegacy/internal/notify",
+          "example.com/orderslegacy/internal/payment",
+          "example.com/orderslegacy/internal/promo",
+          "example.com/orderslegacy/internal/shipping",
+          "example.com/orderslegacy/internal/stock"
+        ]
+      }
+    },
+    {
+      "id": "wasted-abstraction",
+      "severity": "warning",
+      "package": "example.com/orderslegacy/internal/payment",
+      "message": "interface Gateway exists, but consumers depend on its implementation (1) rather than on the interface (0): the dependency was not inverted",
+      "evidence": {
+        "concrete_refs": 1,
+        "concrete_used_by": [
+          "example.com/orderslegacy/internal/order"
+        ],
+        "iface_refs": 0,
+        "implementers": [
+          "example.com/orderslegacy/internal/payment.StripeGateway"
+        ],
+        "interface": "Gateway",
+        "referenced_by": []
+      }
+    }
+  ],
+  "summary": {
+    "packages": 12,
+    "avg_distance": 0.4139,
+    "pain": 2,
+    "uselessness": 1,
+    "main_sequence": 9,
+    "isolated": 0,
+    "cycles": 0
+  }
+}

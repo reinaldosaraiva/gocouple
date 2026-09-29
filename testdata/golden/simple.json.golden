@@ -1,0 +1,89 @@
+{
+  "schema_version": "1",
+  "tool_version": "dev",
+  "module": "example.com/simple",
+  "config": {
+    "distance_threshold": 0.5,
+    "include_external": false,
+    "include_tests": false,
+    "exported_only": false
+  },
+  "packages": [
+    {
+      "path": "example.com/simple/a",
+      "is_main": false,
+      "ca": 0,
+      "ce": 1,
+      "instability": 1,
+      "na": 0,
+      "nc": 1,
+      "abstractness": 0,
+      "distance": 0,
+      "zone": "main_sequence",
+      "imports": [
+        "example.com/simple/b"
+      ],
+      "imported_by": []
+    },
+    {
+      "path": "example.com/simple/b",
+      "is_main": false,
+      "ca": 1,
+      "ce": 1,
+      "instability": 0.5,
+      "na": 0,
+      "nc": 1,
+      "abstractness": 0,
+      "distance": 0.5,
+      "zone": "main_sequence",
+      "imports": [
+        "example.com/simple/c"
+      ],
+      "imported_by": [
+        "example.com/simple/a"
+      ]
+    },
+    {
+      "path": "example.com/simple/c",
+      "is_main": false,
+      "ca": 1,
+      "ce": 0,
+      "instability": 0,
+      "na": 1,
+      "nc": 3,
+      "abstractness": 0.3333,
+      "distance": 0.6667,
+      "zone": "pain",
+      "imports": [],
+      "imported_by": [
+        "example.com/simple/b"
+      ]
+    }
+  ],
+  "cycles": [],
+  "diagnostics": [
+    {
+      "id": "wasted-abstraction",
+      "severity": "warning",
+      "package": "example.com/simple/c",
+      "message": "interface Store has no consumers outside its package",
+      "evidence": {
+        "concrete_refs": 0,
+        "concrete_used_by": [],
+        "iface_refs": 0,
+        "implementers": [],
+        "interface": "Store",
+        "referenced_by": []
+      }
+    }
+  ],
+  "summary": {
+    "packages": 3,
+    "avg_distance": 0.3889,
+    "pain": 1,
+    "uselessness": 0,
+    "main_sequence": 2,
+    "isolated": 0,
+    "cycles": 0
+  }
+}

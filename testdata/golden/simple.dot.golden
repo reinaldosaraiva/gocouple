@@ -1,0 +1,9 @@
+digraph gocouple {
+  rankdir=LR;
+  node [shape=box, style=filled];
+  n1 [label="a", fillcolor="#c9e7c9"];
+  n2 [label="b", fillcolor="#c9e7c9"];
+  n3 [label="c", fillcolor="#f4b6b6"];
+  n1 -> n2;
+  n2 -> n3;
+}

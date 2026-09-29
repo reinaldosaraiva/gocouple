@@ -1,0 +1,25 @@
+PACKAGE                                      Ca  Ce  I     Na  Nc  A     D     ZONE
+example.com/orderslegacy/internal/contracts  0   1   1.00  2   2   1.00  1.00  uselessness
+example.com/orderslegacy/internal/logger     10  0   0.00  0   1   0.00  1.00  pain
+example.com/orderslegacy/internal/promo      2   1   0.33  0   0   0.00  0.67  pain
+example.com/orderslegacy/internal/customer   2   2   0.50  0   1   0.00  0.50  main_sequence
+example.com/orderslegacy/internal/shipping   1   1   0.50  0   1   0.00  0.50  main_sequence
+example.com/orderslegacy/internal/audit      1   2   0.67  0   1   0.00  0.33  main_sequence
+example.com/orderslegacy/internal/catalog    1   2   0.67  0   1   0.00  0.33  main_sequence
+example.com/orderslegacy/internal/stock      1   2   0.67  0   1   0.00  0.33  main_sequence
+example.com/orderslegacy/internal/db         4   1   0.20  1   2   0.50  0.30  main_sequence
+example.com/orderslegacy/internal/notify     1   1   0.50  1   2   0.50  0.00  main_sequence
+example.com/orderslegacy/internal/order      0   10  1.00  0   1   0.00  0.00  main_sequence
+example.com/orderslegacy/internal/payment    1   1   0.50  1   2   0.50  0.00  main_sequence
+
+Summary: packages=12 avg_distance=0.41 pain=2 uselessness=1 main_sequence=9 isolated=0 cycles=0
+
+Diagnostics (8)
+[warning] uselessness-zone example.com/orderslegacy/internal/contracts: abstract and unstable package; consider removing abstractions that have no consumers
+[warning] wasted-abstraction example.com/orderslegacy/internal/contracts: interface Clock has no consumers outside its package
+[warning] wasted-abstraction example.com/orderslegacy/internal/contracts: interface CustomerLookup has no consumers outside its package
+[warning] concrete-hotspot example.com/orderslegacy/internal/logger: package without abstractions is imported directly by 10 packages
+[warning] pain-zone example.com/orderslegacy/internal/logger: stable and concrete package used by 10 packages; introduce a contract (interface) consumed by the dependents or inject the dependency
+[warning] wasted-abstraction example.com/orderslegacy/internal/notify: interface Notifier has no consumers outside its package
+[warning] god-package example.com/orderslegacy/internal/order: package imports 10 packages (threshold 8) and knows too much
+[warning] wasted-abstraction example.com/orderslegacy/internal/payment: interface Gateway exists, but consumers depend on its implementation (1) rather than on the interface (0): the dependency was not inverted

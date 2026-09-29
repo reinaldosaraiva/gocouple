@@ -1,0 +1,8 @@
+package,ca,ce,i,na,nc,a,d,zone
+example.com/ordersrefactored/cmd/orders,0,5,1.0000,0,0,0.0000,0.0000,main_sequence
+example.com/ordersrefactored/internal/catalog,1,1,0.5000,0,1,0.0000,0.5000,main_sequence
+example.com/ordersrefactored/internal/contracts,5,0,0.0000,4,5,0.8000,0.2000,main_sequence
+example.com/ordersrefactored/internal/logger,1,1,0.5000,0,1,0.0000,0.5000,main_sequence
+example.com/ordersrefactored/internal/notify,1,1,0.5000,0,1,0.0000,0.5000,main_sequence
+example.com/ordersrefactored/internal/order,1,1,0.5000,0,1,0.0000,0.5000,main_sequence
+example.com/ordersrefactored/internal/payment,1,1,0.5000,0,1,0.0000,0.5000,main_sequence

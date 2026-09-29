@@ -1,0 +1,5 @@
+# Pure-data packages are stable and concrete by design, so the metrics place
+# them in the pain zone. Owner-approved fallback, see docs/decisions.md.
+exclude:
+  - "**/internal/model"
+  - "**/internal/config"

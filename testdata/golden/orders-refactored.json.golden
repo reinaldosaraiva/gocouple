@@ -1,0 +1,154 @@
+{
+  "schema_version": "1",
+  "tool_version": "dev",
+  "module": "example.com/ordersrefactored",
+  "config": {
+    "distance_threshold": 0.5,
+    "include_external": false,
+    "include_tests": false,
+    "exported_only": false
+  },
+  "packages": [
+    {
+      "path": "example.com/ordersrefactored/cmd/orders",
+      "is_main": true,
+      "ca": 0,
+      "ce": 5,
+      "instability": 1,
+      "na": 0,
+      "nc": 0,
+      "abstractness": 0,
+      "distance": 0,
+      "zone": "main_sequence",
+      "imports": [
+        "example.com/ordersrefactored/internal/catalog",
+        "example.com/ordersrefactored/internal/logger",
+        "example.com/ordersrefactored/internal/notify",
+        "example.com/ordersrefactored/internal/order",
+        "example.com/ordersrefactored/internal/payment"
+      ],
+      "imported_by": []
+    },
+    {
+      "path": "example.com/ordersrefactored/internal/catalog",
+      "is_main": false,
+      "ca": 1,
+      "ce": 1,
+      "instability": 0.5,
+      "na": 0,
+      "nc": 1,
+      "abstractness": 0,
+      "distance": 0.5,
+      "zone": "main_sequence",
+      "imports": [
+        "example.com/ordersrefactored/internal/contracts"
+      ],
+      "imported_by": [
+        "example.com/ordersrefactored/cmd/orders"
+      ]
+    },
+    {
+      "path": "example.com/ordersrefactored/internal/contracts",
+      "is_main": false,
+      "ca": 5,
+      "ce": 0,
+      "instability": 0,
+      "na": 4,
+      "nc": 5,
+      "abstractness": 0.8,
+      "distance": 0.2,
+      "zone": "main_sequence",
+      "imports": [],
+      "imported_by": [
+        "example.com/ordersrefactored/internal/catalog",
+        "example.com/ordersrefactored/internal/logger",
+        "example.com/ordersrefactored/internal/notify",
+        "example.com/ordersrefactored/internal/order",
+        "example.com/ordersrefactored/internal/payment"
+      ]
+    },
+    {
+      "path": "example.com/ordersrefactored/internal/logger",
+      "is_main": false,
+      "ca": 1,
+      "ce": 1,
+      "instability": 0.5,
+      "na": 0,
+      "nc": 1,
+      "abstractness": 0,
+      "distance": 0.5,
+      "zone": "main_sequence",
+      "imports": [
+        "example.com/ordersrefactored/internal/contracts"
+      ],
+      "imported_by": [
+        "example.com/ordersrefactored/cmd/orders"
+      ]
+    },
+    {
+      "path": "example.com/ordersrefactored/internal/notify",
+      "is_main": false,
+      "ca": 1,
+      "ce": 1,
+      "instability": 0.5,
+      "na": 0,
+      "nc": 1,
+      "abstractness": 0,
+      "distance": 0.5,
+      "zone": "main_sequence",
+      "imports": [
+        "example.com/ordersrefactored/internal/contracts"
+      ],
+      "imported_by": [
+        "example.com/ordersrefactored/cmd/orders"
+      ]
+    },
+    {
+      "path": "example.com/ordersrefactored/internal/order",
+      "is_main": false,
+      "ca": 1,
+      "ce": 1,
+      "instability": 0.5,
+      "na": 0,
+      "nc": 1,
+      "abstractness": 0,
+      "distance": 0.5,
+      "zone": "main_sequence",
+      "imports": [
+        "example.com/ordersrefactored/internal/contracts"
+      ],
+      "imported_by": [
+        "example.com/ordersrefactored/cmd/orders"
+      ]
+    },
+    {
+      "path": "example.com/ordersrefactored/internal/payment",
+      "is_main": false,
+      "ca": 1,
+      "ce": 1,
+      "instability": 0.5,
+      "na": 0,
+      "nc": 1,
+      "abstractness": 0,
+      "distance": 0.5,
+      "zone": "main_sequence",
+      "imports": [
+        "example.com/ordersrefactored/internal/contracts"
+      ],
+      "imported_by": [
+        "example.com/ordersrefactored/cmd/orders"
+      ]
+    }
+  ],
+  "cycles": [],
+  "diagnostics": [],
+  "summary": {
+    "packages": 7,
+    "avg_distance": 0.3857,
+    "pain": 0,
+    "uselessness": 0,
+    "main_sequence": 7,
+    "isolated": 0,
+    "cycles": 0
+  }
+}

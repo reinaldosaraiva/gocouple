@@ -1,0 +1,32 @@
+version: "2"
+
+linters:
+  default: standard
+  enable:
+    - errorlint
+    - gocritic
+    - nilnil
+    - revive
+  settings:
+    revive:
+      rules:
+        - name: exported
+        - name: context-as-argument
+        - name: error-naming
+        - name: empty-block
+        - name: superfluous-else
+        - name: indent-error-flow
+        - name: unreachable-code
+  exclusions:
+    paths:
+      - testdata
+    rules:
+      - path: _test\.go
+        linters:
+          - revive
+          - errorlint
+
+formatters:
+  enable:
+    - gofmt
+    - goimports
