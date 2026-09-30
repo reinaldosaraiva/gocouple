@@ -20,6 +20,7 @@ type Config struct {
 	CompositionRoots   []string
 	Ignore             []IgnoreRule
 	Check              Check
+	VolatilitySince    string `json:",omitempty"`
 }
 
 // IgnoreRule silences one diagnostic rule on the packages matching a glob

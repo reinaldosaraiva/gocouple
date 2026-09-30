@@ -10,7 +10,8 @@ import (
 const reasonGenerated = "generated code"
 
 // Suppress splits diags into those to report and those silenced because the
-// package holds only generated code or an ignore rule names it. Import cycles
+// package holds only generated code, an ignore rule names it, or a pain-zone
+// package had no commit in the volatility window. Import cycles
 // are never silenced for being generated: they are real wherever they start. The relative
 // order of diags is kept in both results and neither is nil.
 func Suppress(snap *model.Snapshot, cfg config.Config, diags []model.Diagnostic) ([]model.Diagnostic, []model.Suppressed) {
@@ -20,12 +21,20 @@ func Suppress(snap *model.Snapshot, cfg config.Config, diags []model.Diagnostic)
 			generated[p.Path] = true
 		}
 	}
+	churn := map[string]int{}
+	since := volatilityDate(snap)
+	for _, p := range snap.Packages {
+		churn[p.Path] = p.Churn
+	}
 	kept := []model.Diagnostic{}
 	suppressed := []model.Suppressed{}
 	for _, d := range diags {
 		reason, ok := cfg.IgnoreReason(d.ID, d.Package)
 		if !ok && generated[d.Package] && d.ID != "dependency-cycle" {
 			reason, ok = reasonGenerated, true
+		}
+		if n, measured := churn[d.Package]; !ok && d.ID == "pain-zone" && since != "" && measured && n == 0 {
+			reason, ok = "stable in window (no commit since "+since+")", true
 		}
 		if !ok {
 			kept = append(kept, d)

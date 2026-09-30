@@ -127,3 +127,17 @@ func TestParseIgnoreRejectsIncompleteEntries(t *testing.T) {
 		})
 	}
 }
+
+func TestParseVolatilitySince(t *testing.T) {
+	cfg, err := Parse([]byte("volatility:\n  since: \" 180d \"\n"))
+	if err != nil || cfg.VolatilitySince != "180d" {
+		t.Errorf("since = %q, err = %v", cfg.VolatilitySince, err)
+	}
+	cfg, err = Parse([]byte("volatility: {}\n"))
+	if err != nil || cfg.VolatilitySince != "" {
+		t.Errorf("empty volatility block: since = %q, err = %v", cfg.VolatilitySince, err)
+	}
+	if _, err := Parse([]byte("volatility:\n  window: 30d\n")); err == nil {
+		t.Error("unknown key under volatility must fail")
+	}
+}

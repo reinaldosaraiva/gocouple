@@ -10,6 +10,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/reinaldosaraiva/gocouple/internal/gitrun"
+
 	"github.com/reinaldosaraiva/gocouple/internal/analysis"
 	"github.com/reinaldosaraiva/gocouple/internal/config"
 	"github.com/reinaldosaraiva/gocouple/internal/history"
@@ -142,7 +144,7 @@ func TestHistoryOnRealRepository(t *testing.T) {
 		Progress:  &progress,
 	}
 
-	h, stats, err := history.Run(t.Context(), history.ExecRunner{}, analyze, opts)
+	h, stats, err := history.Run(t.Context(), gitrun.Exec{}, analyze, opts)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -185,7 +187,7 @@ func TestHistoryOnRealRepository(t *testing.T) {
 		t.Error("uncommitted change was lost")
 	}
 
-	again, stats2, err := history.Run(t.Context(), history.ExecRunner{}, analyze, opts)
+	again, stats2, err := history.Run(t.Context(), gitrun.Exec{}, analyze, opts)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -210,7 +212,7 @@ func TestHistoryCancelledLeavesNoWorktree(t *testing.T) {
 		<-ctx.Done()
 		return nil, ctx.Err()
 	}
-	_, _, err := history.Run(ctx, history.ExecRunner{}, analyze, history.Options{
+	_, _, err := history.Run(ctx, gitrun.Exec{}, analyze, history.Options{
 		Repo: repo, Selection: history.Selection{FirstParent: true}, Workers: 2, NoCache: true,
 	})
 	if err == nil {

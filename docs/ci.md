@@ -50,3 +50,9 @@ Inputs: `args` (passed to `gocouple check` after word splitting, so it must come
 ## Baseline mode
 
 Commit `analysis.json` (from `gocouple analyze --format json --out analysis.json ./...`) and run `gocouple check --baseline analysis.json ./...`. Only a new pain-zone package, a new cycle, or an average distance increase above `--tolerance` fails.
+
+## Volatility in CI
+
+`gocouple check --volatility-since 180d ./...` (or `volatility.since` in `.gocouple.yaml`) suppresses a `pain-zone` finding on a package that had no commit in the window, so unchanged debt stays visible under `Suppressed` in `analyze` but does not count toward `max_pain_packages`, `max_distance` or a `--baseline` regression. A pain package that changed in the window still counts.
+
+The measurement needs the full history: use `actions/checkout` with `fetch-depth: 0`. In a shallow clone or outside a git work tree the run continues without volatility and prints a warning, so a misconfigured CI degrades to the stricter behaviour instead of failing. A baseline written without volatility loads unchanged. `gocouple report --snapshot analysis.json` shows the `Churn` column when the snapshot was produced with volatility.

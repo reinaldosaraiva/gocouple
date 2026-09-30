@@ -1,0 +1,142 @@
+{
+  "schema_version": "1",
+  "tool_version": "dev",
+  "module": "example.com/v",
+  "config": {
+    "distance_threshold": 0.5,
+    "include_external": false,
+    "include_tests": false,
+    "exported_only": false,
+    "volatility_since": "2026-03-01T00:00:00Z"
+  },
+  "packages": [
+    {
+      "path": "example.com/v/cold",
+      "is_main": false,
+      "ca": 3,
+      "ce": 0,
+      "instability": 0,
+      "na": 0,
+      "nc": 1,
+      "abstractness": 0,
+      "distance": 1,
+      "zone": "pain",
+      "imports": [],
+      "imported_by": [
+        "example.com/v/u1",
+        "example.com/v/u2",
+        "example.com/v/u3"
+      ]
+    },
+    {
+      "path": "example.com/v/hot",
+      "is_main": false,
+      "ca": 3,
+      "ce": 0,
+      "instability": 0,
+      "na": 0,
+      "nc": 1,
+      "abstractness": 0,
+      "distance": 1,
+      "zone": "pain",
+      "imports": [],
+      "imported_by": [
+        "example.com/v/u1",
+        "example.com/v/u2",
+        "example.com/v/u3"
+      ],
+      "churn": 1,
+      "volatility": 1
+    },
+    {
+      "path": "example.com/v/u1",
+      "is_main": false,
+      "ca": 0,
+      "ce": 2,
+      "instability": 1,
+      "na": 0,
+      "nc": 0,
+      "abstractness": 0,
+      "distance": 0,
+      "zone": "main_sequence",
+      "imports": [
+        "example.com/v/cold",
+        "example.com/v/hot"
+      ],
+      "imported_by": []
+    },
+    {
+      "path": "example.com/v/u2",
+      "is_main": false,
+      "ca": 0,
+      "ce": 2,
+      "instability": 1,
+      "na": 0,
+      "nc": 0,
+      "abstractness": 0,
+      "distance": 0,
+      "zone": "main_sequence",
+      "imports": [
+        "example.com/v/cold",
+        "example.com/v/hot"
+      ],
+      "imported_by": []
+    },
+    {
+      "path": "example.com/v/u3",
+      "is_main": false,
+      "ca": 0,
+      "ce": 2,
+      "instability": 1,
+      "na": 0,
+      "nc": 0,
+      "abstractness": 0,
+      "distance": 0,
+      "zone": "main_sequence",
+      "imports": [
+        "example.com/v/cold",
+        "example.com/v/hot"
+      ],
+      "imported_by": []
+    }
+  ],
+  "cycles": [],
+  "diagnostics": [
+    {
+      "id": "pain-zone",
+      "severity": "warning",
+      "package": "example.com/v/hot",
+      "message": "stable and concrete package used by 3 packages; introduce a contract (interface) consumed by the dependents or inject the dependency; changed 1 times since 2026-03-01",
+      "evidence": {
+        "abstractness": 0,
+        "ca": 3,
+        "ce": 0,
+        "churn": 1,
+        "distance": 1,
+        "imported_by": [
+          "example.com/v/u1",
+          "example.com/v/u2",
+          "example.com/v/u3"
+        ],
+        "instability": 0
+      }
+    }
+  ],
+  "suppressed": [
+    {
+      "id": "pain-zone",
+      "package": "example.com/v/cold",
+      "message": "stable and concrete package used by 3 packages; introduce a contract (interface) consumed by the dependents or inject the dependency",
+      "reason": "stable in window (no commit since 2026-03-01)"
+    }
+  ],
+  "summary": {
+    "packages": 5,
+    "avg_distance": 0.4,
+    "pain": 2,
+    "uselessness": 0,
+    "main_sequence": 3,
+    "isolated": 0,
+    "cycles": 0
+  }
+}

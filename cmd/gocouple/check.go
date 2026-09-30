@@ -63,6 +63,7 @@ func newCheckCmd() *cobra.Command {
 		return &exitCodeError{code: exitError, err: err}
 	})
 	f.register(cmd, ".")
+	f.registerVolatility(cmd)
 	fl := cmd.Flags()
 	fl.Float64Var(&f.maxDistance, "max-distance", 0, "maximum distance of a relevant package (default from config, 0.7)")
 	fl.IntVar(&f.maxPain, "max-pain-packages", 0, "maximum allowed pain-zone packages (default from config, 0)")

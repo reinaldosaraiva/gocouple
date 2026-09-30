@@ -25,10 +25,21 @@ func Markdown(w io.Writer, snap *model.Snapshot) error {
 	fmt.Fprintf(&b, "| Packages | %d |\n| Average distance | %.2f |\n| Pain | %d |\n| Uselessness | %d |\n| Main sequence | %d |\n| Isolated | %d |\n| Cycles | %d |\n\n",
 		s.Packages, float64(s.AvgDistance), s.Pain, s.Uselessness, s.MainSequence, s.Isolated, s.Cycles)
 
-	b.WriteString("## Packages\n\n| Package | Ca | Ce | I | Na | Nc | A | D | Zone |\n|---|---|---|---|---|---|---|---|---|\n")
+	churn := snap.Config.VolatilitySince != ""
+	b.WriteString("## Packages\n\n| Package | Ca | Ce | I | Na | Nc | A | D | Zone |")
+	sep := "\n|---|---|---|---|---|---|---|---|---|"
+	if churn {
+		b.WriteString(" Churn |")
+		sep += "---|"
+	}
+	b.WriteString(sep + "\n")
 	for _, p := range sortedByDistance(snap.Packages) {
-		fmt.Fprintf(&b, "| `%s` | %d | %d | %.2f | %d | %d | %.2f | %.2f | %s |\n",
+		fmt.Fprintf(&b, "| `%s` | %d | %d | %.2f | %d | %d | %.2f | %.2f | %s |",
 			p.Path, p.Ca, p.Ce, float64(p.Instability), p.Na, p.Nc, float64(p.Abstractness), float64(p.Distance), p.Zone)
+		if churn {
+			fmt.Fprintf(&b, " %d |", p.Churn)
+		}
+		b.WriteString("\n")
 	}
 
 	b.WriteString("\n## Diagnostics\n\n")

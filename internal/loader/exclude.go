@@ -10,7 +10,7 @@ import (
 // Exclude drops the packages for which excluded returns true and removes
 // them from the imports of the remaining packages, so they affect no metric.
 func Exclude(res Result, excluded func(path string) bool) Result {
-	out := Result{Module: res.Module}
+	out := Result{Module: res.Module, ModuleDir: res.ModuleDir}
 	for _, p := range res.Packages {
 		if excluded(p.Path) {
 			continue

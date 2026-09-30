@@ -25,9 +25,10 @@ type Options struct {
 
 // Result is the module path and its loaded packages sorted by path.
 type Result struct {
-	Module   string
-	Packages []model.Package
-	Typed    []typesusage.Package
+	Module    string
+	ModuleDir string
+	Packages  []model.Package
+	Typed     []typesusage.Package
 }
 
 const mode = packages.NeedName | packages.NeedFiles | packages.NeedImports |
@@ -50,7 +51,7 @@ func Load(ctx context.Context, opts Options) (Result, error) {
 		return Result{}, err
 	}
 
-	module := mainModule(loaded)
+	module, moduleDir := mainModule(loaded)
 	if module == "" {
 		return Result{}, fmt.Errorf("loading %v in %q: no packages matched", patterns, opts.Dir)
 	}
@@ -80,7 +81,7 @@ func Load(ctx context.Context, opts Options) (Result, error) {
 	}
 	sort.Slice(out, func(i, j int) bool { return out[i].Path < out[j].Path })
 	sort.Slice(typed, func(i, j int) bool { return typed[i].Path < typed[j].Path })
-	return Result{Module: module, Packages: out, Typed: typed}, nil
+	return Result{Module: module, ModuleDir: moduleDir, Packages: out, Typed: typed}, nil
 }
 
 func loadErrors(pkgs []*packages.Package) error {
@@ -97,18 +98,19 @@ func loadErrors(pkgs []*packages.Package) error {
 	return fmt.Errorf("loading packages: %s", strings.Join(msgs, "; "))
 }
 
-func mainModule(pkgs []*packages.Package) string {
-	var found []string
+func mainModule(pkgs []*packages.Package) (path, dir string) {
+	dirs := map[string]string{}
 	for _, p := range pkgs {
 		if p.Module != nil && p.Module.Main {
-			found = append(found, p.Module.Path)
+			dirs[p.Module.Path] = p.Module.Dir
 		}
 	}
-	if len(found) == 0 {
-		return ""
+	for mod := range dirs {
+		if path == "" || mod < path {
+			path = mod
+		}
 	}
-	sort.Strings(found)
-	return found[0]
+	return path, dirs[path]
 }
 
 func skip(p *packages.Package) bool {

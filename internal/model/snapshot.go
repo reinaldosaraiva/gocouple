@@ -47,6 +47,8 @@ type Package struct {
 	Imports      []string `json:"imports"`
 	ImportedBy   []string `json:"imported_by"`
 	Generated    bool     `json:"generated,omitempty"`
+	Churn        int      `json:"churn,omitempty"`
+	Volatility   Ratio    `json:"volatility,omitempty"`
 }
 
 // Commit identifies the analyzed revision.
@@ -62,6 +64,7 @@ type Config struct {
 	IncludeExternal   bool    `json:"include_external"`
 	IncludeTests      bool    `json:"include_tests"`
 	ExportedOnly      bool    `json:"exported_only"`
+	VolatilitySince   string  `json:"volatility_since,omitempty"`
 }
 
 // Diagnostic is an architectural finding with its evidence.

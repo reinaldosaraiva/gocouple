@@ -97,6 +97,8 @@ The full HTML of the legacy analysis is in [examples/orders-legacy.html](example
 
 ## Configuration
 
+Optional volatility: `gocouple analyze --volatility-since 180d` adds a `CHURN` column and moves a `pain-zone` finding on a package that did not change in the window to the `Suppressed` list, with the reason; see [docs/metrics.md](docs/metrics.md#volatility-opt-in). Needs full git history (`fetch-depth: 0` in CI).
+
 `.gocouple.yaml` in the module root (or `--config`); flags override the file, the file overrides defaults. See [docs/metrics.md](docs/metrics.md#configuration) for every key.
 
 ## Verifying releases
@@ -125,7 +127,7 @@ Package granularity (not file), no detection of reflection or `any`-based inject
 
 ## Roadmap
 
-- Volatility from the git history combined with coupling (balanced coupling), to prioritize hotspots.
+- Volatility in the HTML report chart (dot size or hotspot trail) and per-commit volatility in `history`.
 - Layer and allowlist rules, or an integration with existing architecture linters.
 - Source locations in diagnostics for precise annotations.
 

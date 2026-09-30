@@ -18,23 +18,28 @@ import (
 const FileName = ".gocouple.yaml"
 
 type fileConfig struct {
-	DistanceThreshold  *float64     `yaml:"distance_threshold"`
-	MinCaForPain       *int         `yaml:"min_ca_for_pain"`
-	GodCeThreshold     *int         `yaml:"god_ce_threshold"`
-	HotspotCaThreshold *int         `yaml:"hotspot_ca_threshold"`
-	SDPTolerance       *float64     `yaml:"sdp_tolerance"`
-	ExportedOnly       *bool        `yaml:"exported_only"`
-	IncludeExternal    *bool        `yaml:"include_external"`
-	Exclude            *[]string    `yaml:"exclude"`
-	CompositionRoots   *[]string    `yaml:"composition_roots"`
-	Ignore             []fileIgnore `yaml:"ignore"`
-	Check              *fileCheck   `yaml:"check"`
+	DistanceThreshold  *float64        `yaml:"distance_threshold"`
+	MinCaForPain       *int            `yaml:"min_ca_for_pain"`
+	GodCeThreshold     *int            `yaml:"god_ce_threshold"`
+	HotspotCaThreshold *int            `yaml:"hotspot_ca_threshold"`
+	SDPTolerance       *float64        `yaml:"sdp_tolerance"`
+	ExportedOnly       *bool           `yaml:"exported_only"`
+	IncludeExternal    *bool           `yaml:"include_external"`
+	Exclude            *[]string       `yaml:"exclude"`
+	CompositionRoots   *[]string       `yaml:"composition_roots"`
+	Ignore             []fileIgnore    `yaml:"ignore"`
+	Check              *fileCheck      `yaml:"check"`
+	Volatility         *fileVolatility `yaml:"volatility"`
 }
 
 type fileIgnore struct {
 	Rule    string `yaml:"rule"`
 	Package string `yaml:"package"`
 	Reason  string `yaml:"reason"`
+}
+
+type fileVolatility struct {
+	Since *string `yaml:"since"`
 }
 
 type fileCheck struct {
@@ -69,6 +74,9 @@ func Parse(data []byte) (Config, error) {
 		set(&cfg.Check.MaxDistance, c.MaxDistance)
 		set(&cfg.Check.MaxPainPackages, c.MaxPainPackages)
 		set(&cfg.Check.FailOnCycles, c.FailOnCycles)
+	}
+	if v := f.Volatility; v != nil && v.Since != nil {
+		cfg.VolatilitySince = strings.TrimSpace(*v.Since)
 	}
 	if err := cfg.Validate(); err != nil {
 		return Config{}, err

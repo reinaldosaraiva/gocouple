@@ -14,6 +14,8 @@ import (
 	"sync"
 	"sync/atomic"
 
+	"github.com/reinaldosaraiva/gocouple/internal/gitrun"
+
 	"github.com/reinaldosaraiva/gocouple/internal/model"
 )
 
@@ -42,7 +44,7 @@ type Stats struct {
 // Run analyzes the selected commits, each in a detached worktree that is
 // removed on success, failure and cancellation. The working tree of the
 // user's repository is never modified.
-func Run(ctx context.Context, git GitRunner, analyze Analyzer, opts Options) (*model.History, Stats, error) {
+func Run(ctx context.Context, git gitrun.Runner, analyze Analyzer, opts Options) (*model.History, Stats, error) {
 	top, err := topLevel(ctx, git, opts.Repo)
 	if err != nil {
 		return nil, Stats{}, err
@@ -108,7 +110,7 @@ func Run(ctx context.Context, git GitRunner, analyze Analyzer, opts Options) (*m
 }
 
 type pool struct {
-	git     GitRunner
+	git     gitrun.Runner
 	analyze Analyzer
 	opts    Options
 	top     string
@@ -226,7 +228,7 @@ func (p *pool) warn(c model.Commit, msg string) {
 	_, _ = fmt.Fprintf(p.opts.Progress, "warning: %s: %s\n", shortSHA(c.SHA), msg)
 }
 
-func topLevel(ctx context.Context, git GitRunner, repo string) (string, error) {
+func topLevel(ctx context.Context, git gitrun.Runner, repo string) (string, error) {
 	out, err := git.Run(ctx, repo, "rev-parse", "--show-toplevel")
 	if err != nil {
 		return "", fmt.Errorf("locating repository at %s: %w", repo, err)

@@ -2,6 +2,19 @@
 
 All notable changes are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses [Semantic Versioning](https://semver.org/).
 
+## [0.3.0] - 2026-09-30
+
+### Added
+
+- Opt-in volatility from the git history: `--volatility-since <duration|date|RFC3339>` on `analyze` and `check`, and `volatility.since` in `.gocouple.yaml`. Every package gets `churn` and `volatility` (omitted from the JSON when zero), and the table, csv and markdown output show a `CHURN` column; `report` shows it when the snapshot it renders was produced with volatility.
+- A `pain-zone` finding on a package with no commit in the window moves to `Suppressed` with the reason `stable in window (no commit since <date>)`; with commits it keeps its severity and the message states how many times the package changed. Dormant findings no longer count toward `max_pain_packages`, the `max_distance` ceiling or a `--baseline` regression.
+- Not being in a git work tree, or being in a shallow clone, is a warning and the analysis continues without volatility.
+
+### Changed
+
+- `history` ignores `volatility.since` and prints a note.
+- Without the flag the output is byte-identical to 0.2.1 and a 0.2.1 `analysis.json` still loads as a baseline.
+
 ## [0.2.1] - 2026-09-30
 
 ### Added
