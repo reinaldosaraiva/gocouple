@@ -261,3 +261,19 @@ func TestSuppressedListedWithReason(t *testing.T) {
 		t.Errorf("table without suppressed entries must not print the section:\n%s", clean)
 	}
 }
+
+func TestWarningsListed(t *testing.T) {
+	snap := cycleSnapshot()
+	snap.Warnings = []string{"ignore[0]: pain-zone on m/none silenced no finding (stale)"}
+	table := render(t, func(b *bytes.Buffer, s *model.Snapshot) error { return Table(b, s) }, snap)
+	md := render(t, func(b *bytes.Buffer, s *model.Snapshot) error { return Markdown(b, s) }, snap)
+	for name, out := range map[string]string{"table": table, "markdown": md} {
+		if !strings.Contains(out, "Warnings") || !strings.Contains(out, "silenced no finding") {
+			t.Errorf("%s misses the warning:\n%s", name, out)
+		}
+	}
+	clean := render(t, func(b *bytes.Buffer, s *model.Snapshot) error { return Markdown(b, s) }, cycleSnapshot())
+	if strings.Contains(clean, "Warnings") {
+		t.Errorf("markdown without warnings must not print the section:\n%s", clean)
+	}
+}

@@ -55,3 +55,4 @@ Read-only shallow clones (`--depth 60`) in a temporary directory outside the rep
 - GoReleaser is validated with `go run github.com/goreleaser/goreleaser/v2@latest check` and a local `release --snapshot --clean --skip=sign,sbom`; signing and SBOM generation need `cosign` and `syft`, which the release workflow installs.
 - `.goreleaser.yaml` sets `release.github` explicitly so it also works before a git remote exists. A local snapshot needs `GORELEASER_FORCE_TOKEN=github` and a placeholder `GITHUB_TOKEN` when other forge tokens are present in the environment.
 - Third-party actions are pinned by commit SHA with the tag in a trailing comment.
+- Major tag `v0` moves to the latest `v0.x.y` release after each release (`git tag -f v0 vX.Y.Z` and a force push of the tag), so `uses: reinaldosaraiva/gocouple@v0` follows the current minor. The release workflow only fires on full semver tags, so moving `v0` never re-runs it.

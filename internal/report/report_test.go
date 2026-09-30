@@ -284,3 +284,23 @@ func TestPaletteContrast(t *testing.T) {
 		}
 	}
 }
+
+func TestSuppressedAndWarningsRendered(t *testing.T) {
+	evil := `<b>reason</b>`
+	s := snapshot(mod, []model.Package{{Path: mod + "/x", Nc: 1}})
+	s.Suppressed = []model.Suppressed{{ID: "pain-zone", Package: mod + "/gen", Message: "in pain", Reason: evil}}
+	s.Warnings = []string{"ignore[0]: god-package on **/none silenced no finding (stale)"}
+	out := render(t, Input{Snapshot: s})
+	for _, want := range []string{"<h3>Suppressed</h3>", "sev-suppressed", "<code>gen</code>", "&lt;b&gt;reason&lt;/b&gt;", "<h3>Warnings</h3>", "silenced no finding"} {
+		if !strings.Contains(out, want) {
+			t.Errorf("output missing %q", want)
+		}
+	}
+	if strings.Contains(out, evil) {
+		t.Error("reason reached the page unescaped")
+	}
+	clean := render(t, Input{Snapshot: snapshot(mod, []model.Package{{Path: mod + "/x", Nc: 1}})})
+	if strings.Contains(clean, "<h3>Suppressed</h3>") || strings.Contains(clean, "<h3>Warnings</h3>") {
+		t.Error("sections must be absent without entries")
+	}
+}

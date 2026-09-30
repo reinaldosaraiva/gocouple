@@ -57,5 +57,6 @@ func Run(ctx context.Context, opts Options) (*model.Snapshot, error) {
 	if len(suppressed) > 0 {
 		snap.Suppressed = suppressed
 	}
+	snap.Warnings = diagnose.UnusedIgnores(cfg, suppressed)
 	return snap, nil
 }

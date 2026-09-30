@@ -1,6 +1,8 @@
 package diagnose
 
 import (
+	"fmt"
+
 	"github.com/reinaldosaraiva/gocouple/internal/config"
 	"github.com/reinaldosaraiva/gocouple/internal/model"
 )
@@ -32,4 +34,26 @@ func Suppress(snap *model.Snapshot, cfg config.Config, diags []model.Diagnostic)
 		suppressed = append(suppressed, model.Suppressed{ID: d.ID, Package: d.Package, Message: d.Message, Reason: reason})
 	}
 	return kept, suppressed
+}
+
+// UnusedIgnores reports, one line per entry, the ignore rules of cfg whose
+// rule and package glob match none of suppressed. A stale entry usually means
+// the finding it accepted no longer exists; it is a warning, never an error.
+// An entry shadowed by an earlier one covering the same finding counts as
+// used, since the finding it names is real.
+func UnusedIgnores(cfg config.Config, suppressed []model.Suppressed) []string {
+	var out []string
+	for i, r := range cfg.Ignore {
+		used := false
+		for _, s := range suppressed {
+			if s.ID == r.Rule && config.MatchGlob(r.Package, s.Package) {
+				used = true
+				break
+			}
+		}
+		if !used {
+			out = append(out, fmt.Sprintf("ignore[%d]: %s on %s silenced no finding (%s)", i, r.Rule, r.Package, r.Reason))
+		}
+	}
+	return out
 }

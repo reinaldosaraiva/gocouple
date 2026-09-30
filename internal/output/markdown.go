@@ -46,6 +46,13 @@ func Markdown(w io.Writer, snap *model.Snapshot) error {
 		}
 	}
 
+	if len(snap.Warnings) > 0 {
+		b.WriteString("\n## Warnings\n\n")
+		for _, m := range snap.Warnings {
+			fmt.Fprintf(&b, "- %s\n", m)
+		}
+	}
+
 	b.WriteString("\n## Dependency graph\n\n")
 	b.WriteString(reducedGraph(snap))
 

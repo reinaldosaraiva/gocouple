@@ -152,6 +152,18 @@
       {{if .Diags}}<ul class="diags">
         {{range .Diags}}<li><span class="sev sev-{{.Severity}}">{{.Severity}}</span> <b>{{.ID}}</b> <code>{{.Package}}</code>: {{.Message}}</li>{{end}}
       </ul>{{else}}<p class="note">No diagnostics.</p>{{end}}
+      {{- if .Suppressed}}
+      <h3>Suppressed</h3>
+      <ul class="diags">
+        {{range .Suppressed}}<li><span class="sev sev-suppressed">suppressed</span> <b>{{.ID}}</b> <code>{{.Package}}</code>: {{.Message}} <span class="note">({{.Reason}})</span></li>{{end}}
+      </ul>
+      {{- end}}
+      {{- if .Warnings}}
+      <h3>Warnings</h3>
+      <ul class="diags">
+        {{range .Warnings}}<li><span class="sev sev-warning">warning</span> {{.}}</li>{{end}}
+      </ul>
+      {{- end}}
     </div>
     {{end}}
   </section>

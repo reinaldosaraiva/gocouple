@@ -67,15 +67,17 @@ type view struct {
 }
 
 type frame struct {
-	Index   int
-	Label   string
-	Hidden  bool
-	Summary model.Summary
-	AvgD    string
-	Points  []point
-	Graph   graphView
-	Rows    []row
-	Diags   []diagRow
+	Index      int
+	Label      string
+	Hidden     bool
+	Summary    model.Summary
+	AvgD       string
+	Points     []point
+	Graph      graphView
+	Rows       []row
+	Diags      []diagRow
+	Suppressed []suppressedRow
+	Warnings   []string
 }
 
 type row struct {
@@ -88,6 +90,10 @@ type row struct {
 
 type diagRow struct {
 	Severity, ID, Package, Message string
+}
+
+type suppressedRow struct {
+	ID, Package, Message, Reason string
 }
 
 func buildView(in Input) (view, error) {
@@ -130,15 +136,17 @@ func buildView(in Input) (view, error) {
 	}
 	for i, s := range snaps {
 		f := frame{
-			Index:   i,
-			Label:   labels[i],
-			Hidden:  i != len(snaps)-1,
-			Summary: s.Summary,
-			AvgD:    f2(float64(s.Summary.AvgDistance)),
-			Points:  points(s, v.Chart),
-			Graph:   layoutGraph(s),
-			Rows:    rows(s),
-			Diags:   diags(s),
+			Index:      i,
+			Label:      labels[i],
+			Hidden:     i != len(snaps)-1,
+			Summary:    s.Summary,
+			AvgD:       f2(float64(s.Summary.AvgDistance)),
+			Points:     points(s, v.Chart),
+			Graph:      layoutGraph(s),
+			Rows:       rows(s),
+			Diags:      diags(s),
+			Suppressed: suppressed(s),
+			Warnings:   s.Warnings,
 		}
 		v.Frames = append(v.Frames, f)
 	}
@@ -182,6 +190,14 @@ func diags(s *model.Snapshot) []diagRow {
 	out := make([]diagRow, len(s.Diagnostics))
 	for i, d := range s.Diagnostics {
 		out[i] = diagRow{Severity: d.Severity, ID: d.ID, Package: shortPath(s.Module, d.Package), Message: d.Message}
+	}
+	return out
+}
+
+func suppressed(s *model.Snapshot) []suppressedRow {
+	out := make([]suppressedRow, len(s.Suppressed))
+	for i, d := range s.Suppressed {
+		out[i] = suppressedRow{ID: d.ID, Package: shortPath(s.Module, d.Package), Message: d.Message, Reason: d.Reason}
 	}
 	return out
 }

@@ -91,6 +91,7 @@ See [ci.md](ci.md). `max_distance` is a per-package ceiling applied to packages 
 - Granularity is the package, not the file; a package with one large file and one small file is one unit.
 - Reflection, `any`-based injection and code generation that hides imports are invisible.
 - Generated code is recognized only by the standard header; generators that omit it are not detected, and `ignore` is the fallback.
+- A file that carries the generated header and also hand-written declarations counts as generated, as gopls and golangci-lint treat it; move the hand-written code to another file to have it diagnosed.
 - `pain-zone` cannot tell a stable package that never changes from one that changes often; volatility from the git history would, and is not implemented.
 - Generic interfaces, empty interfaces and constraint interfaces are skipped by `wasted-abstraction`.
 - Interface matching is structural: unrelated types with an identical method set count as implementers.

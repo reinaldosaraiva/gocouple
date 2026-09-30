@@ -115,6 +115,7 @@ type Snapshot struct {
 	Cycles        [][]string   `json:"cycles"`
 	Diagnostics   []Diagnostic `json:"diagnostics"`
 	Suppressed    []Suppressed `json:"suppressed,omitempty"`
+	Warnings      []string     `json:"warnings,omitempty"`
 	Summary       Summary      `json:"summary"`
 
 	Interfaces []InterfaceUsage `json:"-"`

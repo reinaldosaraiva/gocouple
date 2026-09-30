@@ -202,3 +202,21 @@ func TestSuppressKeepsCyclesThroughGeneratedPackages(t *testing.T) {
 		t.Errorf("suppressed = %+v", suppressed)
 	}
 }
+
+func TestUnusedIgnoresTreatsShadowedEntryAsUsed(t *testing.T) {
+	cfg := config.Default()
+	cfg.Ignore = []config.IgnoreRule{
+		{Rule: "pain-zone", Package: "m/**", Reason: "broad"},
+		{Rule: "pain-zone", Package: "m/a", Reason: "narrow"},
+		{Rule: "god-package", Package: "m/a", Reason: "stale"},
+	}
+	suppressed := []model.Suppressed{{ID: "pain-zone", Package: "m/a", Message: "x", Reason: "broad"}}
+	got := UnusedIgnores(cfg, suppressed)
+	want := []string{"ignore[2]: god-package on m/a silenced no finding (stale)"}
+	if diff := cmp.Diff(want, got); diff != "" {
+		t.Errorf("unused ignores (-want +got):\n%s", diff)
+	}
+	if UnusedIgnores(config.Default(), nil) != nil {
+		t.Error("no ignore entries must yield nil")
+	}
+}

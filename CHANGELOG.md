@@ -2,6 +2,18 @@
 
 All notable changes are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses [Semantic Versioning](https://semver.org/).
 
+## [0.2.1] - 2026-09-30
+
+### Added
+
+- The HTML report lists suppressed findings, with their reason, under the diagnostics of each frame.
+- An `ignore` entry that silences no finding is reported as a warning (`warnings` in the JSON, `Warnings` in table, markdown and the report, stderr in `check`); the exit code does not change.
+
+### Changed
+
+- `docs/metrics.md` records that a file carrying the generated header next to hand-written code counts as generated.
+- The release workflow fires only on full semver tags, so the moving major tag `v0` (documented in `docs/decisions.md`) never triggers a release.
+
 ## [0.2.0] - 2026-09-29
 
 ### Added

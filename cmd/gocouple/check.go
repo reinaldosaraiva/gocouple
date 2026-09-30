@@ -118,6 +118,11 @@ func runCheck(cmd *cobra.Command, f checkFlags, patterns []string) error {
 		return err
 	}
 
+	for _, m := range snap.Warnings {
+		if _, err := fmt.Fprintln(cmd.ErrOrStderr(), "gocouple check: warning:", m); err != nil {
+			return err
+		}
+	}
 	violations := check.Evaluate(snap, baseline, opts)
 	out := cmd.OutOrStdout()
 	if os.Getenv("GITHUB_ACTIONS") == "true" {
