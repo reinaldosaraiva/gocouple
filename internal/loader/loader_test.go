@@ -31,6 +31,17 @@ func TestLoadSimple(t *testing.T) {
 	if res.Module != "example.com/simple" {
 		t.Errorf("module = %q", res.Module)
 	}
+	gotDir, err := os.Stat(res.ModuleDir)
+	if err != nil {
+		t.Fatalf("module dir %q: %v", res.ModuleDir, err)
+	}
+	wantDir, err := os.Stat(fixture(t, "simple"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !os.SameFile(gotDir, wantDir) {
+		t.Errorf("module dir = %q, want the simple fixture", res.ModuleDir)
+	}
 	type row struct {
 		Path    string
 		Imports []string
