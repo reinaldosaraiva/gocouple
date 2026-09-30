@@ -41,3 +41,21 @@ func TestEntryRoundTripAndErrors(t *testing.T) {
 		t.Errorf("entry without snapshot must marshal as a failed entry: %s", blank)
 	}
 }
+func TestVolatilityFieldsAreOmittedWhenZero(t *testing.T) {
+	b, err := json.Marshal(struct {
+		P Package
+		C Config
+	}{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, key := range []string{"churn", "volatility"} {
+		if strings.Contains(string(b), key) {
+			t.Errorf("%q must be omitted when zero: %s", key, b)
+		}
+	}
+	b, _ = json.Marshal(Package{Churn: 3, Volatility: 0.5})
+	if !strings.Contains(string(b), `"churn":3`) || !strings.Contains(string(b), `"volatility":0.5`) {
+		t.Errorf("fields missing: %s", b)
+	}
+}

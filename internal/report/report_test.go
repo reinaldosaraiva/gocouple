@@ -304,3 +304,19 @@ func TestSuppressedAndWarningsRendered(t *testing.T) {
 		t.Error("sections must be absent without entries")
 	}
 }
+
+func TestChurnColumnOnlyWhenMeasured(t *testing.T) {
+	s := snapshot(mod, []model.Package{{Path: mod + "/x", Nc: 1}})
+	plain := render(t, Input{Snapshot: s})
+	if strings.Contains(plain, ">Churn<") {
+		t.Error("churn column without volatility")
+	}
+	s.Config.VolatilitySince = "2026-03-01T00:00:00Z"
+	s.Packages[0].Churn = 7
+	out := render(t, Input{Snapshot: s})
+	for _, want := range []string{"<button type=\"button\">Churn</button>", `<td data-sort="7">7</td>`} {
+		if !strings.Contains(out, want) {
+			t.Errorf("output missing %q", want)
+		}
+	}
+}

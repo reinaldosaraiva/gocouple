@@ -91,3 +91,12 @@ func TestDormantSuppressionIgnoresMalformedBoundary(t *testing.T) {
 		t.Errorf("kept=%v suppressed=%v", ids(kept), suppressed)
 	}
 }
+
+func TestPackageAbsentFromSnapshotIsNeverSuppressedAsDormant(t *testing.T) {
+	snap := painSnapshot("2026-03-01T00:00:00Z", model.Package{Path: "m/known"})
+	diags := []model.Diagnostic{{ID: "pain-zone", Package: "m/unknown"}}
+	kept, suppressed := Suppress(snap, config.Default(), diags)
+	if len(kept) != 1 || len(suppressed) != 0 {
+		t.Errorf("kept=%v suppressed=%v", ids(kept), suppressed)
+	}
+}
