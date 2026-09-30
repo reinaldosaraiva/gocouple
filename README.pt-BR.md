@@ -97,6 +97,8 @@ O `check` imprime anotações do GitHub quando `GITHUB_ACTIONS=true`. Entradas: 
 
 ## Configuração
 
+Volatilidade opcional: `gocouple analyze --volatility-since 180d` adiciona a coluna `CHURN` e move um achado `pain-zone` de um pacote que não mudou na janela para a lista `Suppressed`, com o motivo; veja [docs/metrics.md](docs/metrics.md#volatility-opt-in). Exige o histórico git completo (`fetch-depth: 0` no CI).
+
 `.gocouple.yaml` na raiz do módulo (ou `--config`); flags sobrescrevem o arquivo e o arquivo sobrescreve os padrões. Todas as chaves estão em [docs/metrics.md](docs/metrics.md#configuration).
 
 ## Verificando releases
@@ -125,7 +127,7 @@ Granularidade de pacote (não de arquivo), sem detecção de reflection ou inje�
 
 ## Roadmap
 
-- Volatilidade a partir do histórico do git combinada com acoplamento (balanced coupling), para priorizar hotspots.
+- Volatilidade no gráfico do relatório HTML (tamanho do ponto ou trilha de hotspot) e volatilidade por commit no `history`.
 - Regras de camadas e allowlists, ou integração com linters de arquitetura existentes.
 - Localização de código nos diagnósticos para anotações precisas.
 

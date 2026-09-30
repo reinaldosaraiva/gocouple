@@ -56,6 +56,20 @@ ignore:
 
 For `check`, a package whose `pain-zone` or `uselessness-zone` finding is silenced also stops counting against `max_distance`.
 
+## Volatility (opt-in)
+
+`--volatility-since <window>` (or `volatility.since` in `.gocouple.yaml`; the flag wins, an empty flag turns it off) reads the git history once and adds two fields to every package: `churn`, the number of non-merge commits in the window that touched at least one non-test `.go` file directly in the package directory, and `volatility`, `churn` divided by the largest churn of the analysis (0 when nothing changed). The window is a duration in days (`180d`), a date (`2026-01-01`) or an RFC3339 time; it is resolved once to an absolute UTC boundary that is stored as `config.volatility_since` in the JSON. Both fields are omitted from the JSON when zero, and the `CHURN` column appears in the table, csv, markdown and report only when volatility was measured. Without the flag the output is identical to a run without the feature.
+
+Effect on `pain-zone` (balanced coupling: a rigid dependency is acceptable when the package does not change):
+
+- churn 0 in the window: the finding moves to `Suppressed` with the reason `stable in window (no commit since <YYYY-MM-DD>)`; it is listed, never dropped;
+- churn above 0: the finding keeps its severity and the message adds `changed N times since <YYYY-MM-DD>`, and the evidence carries `churn`;
+- an `ignore` reason and the generated-code rule take precedence over the dormant rule.
+
+Environment problems are warnings, not errors: outside a git work tree, in a shallow clone, or when git cannot tell, the analysis runs without volatility and reports why. A failing `git log` or an invalid window is an error. `history` does not compute volatility (it prints a note when the key is set).
+
+Limitations: the window filters on the committer date (`git log --since-as-filter`), so a rebased or cherry-picked commit is dated by its rewrite; renames count at the destination package only; generated files count as changes; merge commits are excluded; the unit is the package, not the file; a repository younger than the window makes every package look active, so choose a window shorter than the project's age.
+
 ## Configuration
 
 `.gocouple.yaml` (discovered in `--dir`, or `--config`); flags win over the file, the file wins over defaults; unknown keys are errors.
@@ -78,6 +92,8 @@ check:
   max_distance: 0.7
   max_pain_packages: 0
   fail_on_cycles: true
+volatility:
+  since: 180d                     # off when absent; a duration, a date or RFC3339
 ```
 
 Globs match import paths; `**` spans segments, `*` stays inside one.
@@ -92,7 +108,7 @@ See [ci.md](ci.md). `max_distance` is a per-package ceiling applied to packages 
 - Reflection, `any`-based injection and code generation that hides imports are invisible.
 - Generated code is recognized only by the standard header; generators that omit it are not detected, and `ignore` is the fallback.
 - A file that carries the generated header and also hand-written declarations counts as generated, as gopls and golangci-lint treat it; move the hand-written code to another file to have it diagnosed.
-- `pain-zone` cannot tell a stable package that never changes from one that changes often; volatility from the git history would, and is not implemented.
+- Without `--volatility-since`, `pain-zone` cannot tell a stable package that never changes from one that changes often; see [Volatility](#volatility-opt-in) for the limits of the measurement.
 - Generic interfaces, empty interfaces and constraint interfaces are skipped by `wasted-abstraction`.
 - Interface matching is structural: unrelated types with an identical method set count as implementers.
 - Only the main module is classified; nested modules and `go.work` workspaces are not merged, and imports of other workspace modules count as external.
