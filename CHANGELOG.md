@@ -6,8 +6,8 @@ All notable changes are documented here. The format follows [Keep a Changelog](h
 
 ### Added
 
-- Opt-in volatility from the git history: `--volatility-since <duration|date>` on `analyze` and `check`, and `volatility.since` in `.gocouple.yaml`. Every package gets `churn` and `volatility` (omitted from the JSON when zero), and the table, csv, markdown and HTML report show a `CHURN` column.
-- A `pain-zone` finding on a package with no commit in the window moves to `Suppressed` with the reason `stable in window (no commit since <date>)`; with commits it keeps its severity and the message states how many times the package changed. Dormant findings no longer count toward `check` thresholds or a `--baseline` regression.
+- Opt-in volatility from the git history: `--volatility-since <duration|date|RFC3339>` on `analyze` and `check`, and `volatility.since` in `.gocouple.yaml`. Every package gets `churn` and `volatility` (omitted from the JSON when zero), and the table, csv and markdown output show a `CHURN` column; `report` shows it when the snapshot it renders was produced with volatility.
+- A `pain-zone` finding on a package with no commit in the window moves to `Suppressed` with the reason `stable in window (no commit since <date>)`; with commits it keeps its severity and the message states how many times the package changed. Dormant findings no longer count toward `max_pain_packages`, the `max_distance` ceiling or a `--baseline` regression.
 - Not being in a git work tree, or being in a shallow clone, is a warning and the analysis continues without volatility.
 
 ### Changed
