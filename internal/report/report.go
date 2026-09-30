@@ -75,6 +75,7 @@ type frame struct {
 	Points     []point
 	Graph      graphView
 	Rows       []row
+	Churn      bool
 	Diags      []diagRow
 	Suppressed []suppressedRow
 	Warnings   []string
@@ -83,6 +84,7 @@ type frame struct {
 type row struct {
 	Path             string
 	Ca, Ce, Na, Nc   int
+	ChurnN           int
 	I, A, D          string
 	IRaw, ARaw, DRaw string
 	Zone             string
@@ -144,6 +146,7 @@ func buildView(in Input) (view, error) {
 			Points:     points(s, v.Chart),
 			Graph:      layoutGraph(s),
 			Rows:       rows(s),
+			Churn:      s.Config.VolatilitySince != "",
 			Diags:      diags(s),
 			Suppressed: suppressed(s),
 			Warnings:   s.Warnings,
@@ -180,7 +183,7 @@ func rows(s *model.Snapshot) []row {
 			Path: shortPath(s.Module, p.Path), Ca: p.Ca, Ce: p.Ce, Na: p.Na, Nc: p.Nc,
 			I: f2(float64(p.Instability)), A: f2(float64(p.Abstractness)), D: f2(float64(p.Distance)),
 			IRaw: f4(float64(p.Instability)), ARaw: f4(float64(p.Abstractness)), DRaw: f4(float64(p.Distance)),
-			Zone: p.Zone,
+			Zone: p.Zone, ChurnN: p.Churn,
 		}
 	}
 	return out

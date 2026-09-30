@@ -7,6 +7,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/reinaldosaraiva/gocouple/internal/gitrun"
+
 	"github.com/reinaldosaraiva/gocouple/internal/model"
 )
 
@@ -25,7 +27,7 @@ type Selection struct {
 // ListCommits returns the selected commits oldest first. Sampling starts at
 // the newest commit and keeps one of every Selection.Every, then keeps at
 // most Selection.Max of the newest ones.
-func ListCommits(ctx context.Context, git GitRunner, repo string, sel Selection) ([]model.Commit, error) {
+func ListCommits(ctx context.Context, git gitrun.Runner, repo string, sel Selection) ([]model.Commit, error) {
 	branch := sel.Branch
 	if branch == "" {
 		branch = "HEAD"

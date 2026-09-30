@@ -24,12 +24,21 @@ func Table(w io.Writer, snap *model.Snapshot) error {
 		return strings.Compare(a.Path, b.Path)
 	})
 
+	churn := snap.Config.VolatilitySince != ""
 	tw := tabwriter.NewWriter(w, 0, 0, 2, ' ', 0)
-	_, _ = fmt.Fprintln(tw, "PACKAGE\tCa\tCe\tI\tNa\tNc\tA\tD\tZONE")
+	header := "PACKAGE\tCa\tCe\tI\tNa\tNc\tA\tD\tZONE"
+	if churn {
+		header += "\tCHURN"
+	}
+	_, _ = fmt.Fprintln(tw, header)
 	for _, p := range pkgs {
-		_, _ = fmt.Fprintf(tw, "%s\t%d\t%d\t%.2f\t%d\t%d\t%.2f\t%.2f\t%s\n",
+		_, _ = fmt.Fprintf(tw, "%s\t%d\t%d\t%.2f\t%d\t%d\t%.2f\t%.2f\t%s",
 			p.Path, p.Ca, p.Ce, float64(p.Instability), p.Na, p.Nc,
 			float64(p.Abstractness), float64(p.Distance), p.Zone)
+		if churn {
+			_, _ = fmt.Fprintf(tw, "\t%d", p.Churn)
+		}
+		_, _ = fmt.Fprintln(tw)
 	}
 	if err := tw.Flush(); err != nil {
 		return fmt.Errorf("writing table: %w", err)

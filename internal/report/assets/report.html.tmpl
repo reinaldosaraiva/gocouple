@@ -125,10 +125,10 @@
           <th scope="col" data-num="1"><button type="button">Nc</button></th>
           <th scope="col" data-num="1"><button type="button">A</button></th>
           <th scope="col" data-num="1"><button type="button">D</button></th>
-          <th scope="col"><button type="button">Zone</button></th>
+          <th scope="col"><button type="button">Zone</button></th>{{if .Churn}}<th scope="col" data-num="1"><button type="button">Churn</button></th>{{end}}
         </tr></thead>
         <tbody>
-        {{range .Rows}}<tr>
+        {{$churn := .Churn}}{{range .Rows}}<tr>
           <td data-sort="{{.Path}}">{{.Path}}</td>
           <td data-sort="{{.Ca}}">{{.Ca}}</td>
           <td data-sort="{{.Ce}}">{{.Ce}}</td>
@@ -137,7 +137,7 @@
           <td data-sort="{{.Nc}}">{{.Nc}}</td>
           <td data-sort="{{.ARaw}}">{{.A}}</td>
           <td data-sort="{{.DRaw}}">{{.D}}</td>
-          <td data-sort="{{.Zone}}" class="zone-{{.Zone}}">{{.Zone}}</td>
+          <td data-sort="{{.Zone}}" class="zone-{{.Zone}}">{{.Zone}}</td>{{if $churn}}<td data-sort="{{.ChurnN}}">{{.ChurnN}}</td>{{end}}
         </tr>{{end}}
         </tbody>
       </table>

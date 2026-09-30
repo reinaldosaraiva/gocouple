@@ -1,4 +1,4 @@
-package history
+package gitrun
 
 import (
 	"context"
@@ -8,16 +8,16 @@ import (
 	"strings"
 )
 
-// GitRunner runs one git command in dir and returns its standard output.
-type GitRunner interface {
+// Runner runs one git command in dir and returns its standard output.
+type Runner interface {
 	Run(ctx context.Context, dir string, args ...string) ([]byte, error)
 }
 
-// ExecRunner runs the git binary found in PATH.
-type ExecRunner struct{}
+// Exec runs the git binary found in PATH.
+type Exec struct{}
 
-// Run implements GitRunner.
-func (ExecRunner) Run(ctx context.Context, dir string, args ...string) ([]byte, error) {
+// Run implements Runner.
+func (Exec) Run(ctx context.Context, dir string, args ...string) ([]byte, error) {
 	cmd := exec.CommandContext(ctx, "git", args...)
 	cmd.Dir = dir
 	out, err := cmd.Output()

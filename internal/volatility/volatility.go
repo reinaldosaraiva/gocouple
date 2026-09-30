@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/reinaldosaraiva/gocouple/internal/history"
+	"github.com/reinaldosaraiva/gocouple/internal/gitrun"
 )
 
 // Result is the churn per package and the environment problems that kept
@@ -49,7 +49,7 @@ func ParseSince(value string, now time.Time) (time.Time, error) {
 // directory. Every path is present in the result, zero when untouched. A
 // missing repository or a shallow clone yields warnings and no churn map;
 // only a failing git log is an error.
-func Compute(ctx context.Context, git history.GitRunner, moduleDir, module string, pkgPaths []string, since time.Time) (Result, error) {
+func Compute(ctx context.Context, git gitrun.Runner, moduleDir, module string, pkgPaths []string, since time.Time) (Result, error) {
 	inside, err := git.Run(ctx, moduleDir, "rev-parse", "--is-inside-work-tree")
 	if err != nil || strings.TrimSpace(string(inside)) != "true" {
 		return Result{Warnings: []string{"volatility skipped: " + moduleDir + " is not inside a git work tree"}}, nil

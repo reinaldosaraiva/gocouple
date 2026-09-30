@@ -1,0 +1,6 @@
+package,ca,ce,i,na,nc,a,d,zone,churn
+example.com/v/cold,3,0,0.0000,0,1,0.0000,1.0000,pain,0
+example.com/v/hot,3,0,0.0000,0,1,0.0000,1.0000,pain,1
+example.com/v/u1,0,2,1.0000,0,0,0.0000,0.0000,main_sequence,0
+example.com/v/u2,0,2,1.0000,0,0,0.0000,0.0000,main_sequence,0
+example.com/v/u3,0,2,1.0000,0,0,0.0000,0.0000,main_sequence,0

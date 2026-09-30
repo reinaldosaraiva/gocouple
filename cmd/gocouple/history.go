@@ -6,6 +6,8 @@ import (
 	"io"
 	"path/filepath"
 
+	"github.com/reinaldosaraiva/gocouple/internal/gitrun"
+
 	"github.com/reinaldosaraiva/gocouple/internal/analysis"
 	"github.com/reinaldosaraiva/gocouple/internal/history"
 	"github.com/reinaldosaraiva/gocouple/internal/model"
@@ -66,6 +68,8 @@ func runHistory(cmd *cobra.Command, f historyFlags, patterns []string) error {
 		return err
 	}
 
+	cfg.VolatilitySince = ""
+
 	analyze := func(ctx context.Context, moduleDir string) (*model.Snapshot, error) {
 		return analysis.Run(ctx, analysis.Options{
 			Dir:          moduleDir,
@@ -75,7 +79,7 @@ func runHistory(cmd *cobra.Command, f historyFlags, patterns []string) error {
 			ToolVersion:  version,
 		})
 	}
-	h, stats, err := history.Run(cmd.Context(), history.ExecRunner{}, analyze, history.Options{
+	h, stats, err := history.Run(cmd.Context(), gitrun.Exec{}, analyze, history.Options{
 		Repo: repo,
 		Dir:  f.dir,
 		Selection: history.Selection{

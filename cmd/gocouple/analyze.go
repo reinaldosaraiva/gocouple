@@ -43,6 +43,7 @@ func newAnalyzeCmd() *cobra.Command {
 		},
 	}
 	f.register(cmd, ".")
+	f.registerVolatility(cmd)
 	cmd.Flags().StringVar(&f.format, "format", "table", "output format: "+strings.Join(formatNames(), "|"))
 	cmd.Flags().StringVar(&f.out, "out", "", "write output to this file instead of stdout")
 	return cmd

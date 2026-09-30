@@ -10,8 +10,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/reinaldosaraiva/gocouple/internal/gitrun"
+
 	"github.com/google/go-cmp/cmp"
-	"github.com/reinaldosaraiva/gocouple/internal/history"
 )
 
 type call struct {
@@ -220,7 +221,7 @@ func TestComputeSyntheticRepository(t *testing.T) {
 	gitCmd(t, repo, "2026-03-16T12:00:00Z", "merge", "--no-ff", "-m", "merge", "side")
 
 	pkgs := []string{"m", "m/a", "m/a/sub", "m/b", "m/c", "m/café"}
-	res, err := Compute(t.Context(), history.ExecRunner{}, mod, "m", pkgs, since)
+	res, err := Compute(t.Context(), gitrun.Exec{}, mod, "m", pkgs, since)
 	if err != nil {
 		t.Fatal(err)
 	}
