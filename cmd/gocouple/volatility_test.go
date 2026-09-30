@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"os"
 	"os/exec"
@@ -156,5 +157,33 @@ func TestVolatilityAcceptsBaselineFromPriorVersion(t *testing.T) {
 	}
 	if out, err := runCLI(t, "check", "--dir", repo, "--volatility-since", "2026-03-01", "--baseline", base); err != nil {
 		t.Errorf("baseline without volatility fields must load: %v\n%s", err, out)
+	}
+}
+
+func TestHistoryIgnoresVolatilityConfigWithNote(t *testing.T) {
+	repo := volatilityRepo(t)
+	writeFiles(t, repo, map[string]string{".gocouple.yaml": "volatility:\n  since: 2026-03-01\n"})
+	var errOut bytes.Buffer
+	root := newRootCmd()
+	root.SetOut(&bytes.Buffer{})
+	root.SetErr(&errOut)
+	root.SetArgs([]string{"history", "--repo", repo, "--out", filepath.Join(t.TempDir(), "h.json"), "--no-cache"})
+	if err := root.ExecuteContext(t.Context()); err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(errOut.String(), "volatility.since is ignored") {
+		t.Errorf("note missing:\n%s", errOut.String())
+	}
+}
+
+func TestCheckCountsOnlyPainThatChangedInWindow(t *testing.T) {
+	repo := volatilityRepo(t)
+	out, err := runCLI(t, "check", "--dir", repo)
+	if exitOf(t, err) != 1 || !strings.Contains(out, "2 packages in the pain zone") {
+		t.Fatalf("without volatility both packages count: err=%v\n%s", err, out)
+	}
+	out, err = runCLI(t, "check", "--dir", repo, "--volatility-since", "2026-03-01")
+	if exitOf(t, err) != 1 || !strings.Contains(out, "1 packages in the pain zone") || strings.Contains(out, "example.com/v/cold") {
+		t.Errorf("with volatility only the changed package counts: err=%v\n%s", err, out)
 	}
 }

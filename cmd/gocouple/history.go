@@ -68,7 +68,12 @@ func runHistory(cmd *cobra.Command, f historyFlags, patterns []string) error {
 		return err
 	}
 
-	cfg.VolatilitySince = ""
+	if cfg.VolatilitySince != "" {
+		if _, err := fmt.Fprintln(cmd.ErrOrStderr(), "history: volatility.since is ignored; volatility is computed for a single analysis only"); err != nil {
+			return err
+		}
+		cfg.VolatilitySince = ""
+	}
 
 	analyze := func(ctx context.Context, moduleDir string) (*model.Snapshot, error) {
 		return analysis.Run(ctx, analysis.Options{
